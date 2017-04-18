@@ -25,10 +25,8 @@
  '[powerlaces.boot-cljs-devtools :refer [cljs-devtools dirac]])
 
 (deftask build []
-  (comp (speak)
-        
+  (comp
         (cljs)
-        
         (garden :styles-var 'speech.styles/screen
 :output-to "css/garden.css")))
 
@@ -36,7 +34,6 @@
   (comp (serve)
         (watch)
         (cljs-repl)
-        
         (cljs-devtools)
         (reload)
         (build)))
