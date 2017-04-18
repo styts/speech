@@ -1,9 +1,10 @@
 (set-env!
  :source-paths    #{"src/cljs" "src/clj"}
  :resource-paths  #{"resources"}
- :dependencies '[[adzerk/boot-cljs          "1.7.228-2"  :scope "test"]
+ :dependencies '[;; frontend
+                 [adzerk/boot-cljs          "1.7.228-2"  :scope "test"]
                  [adzerk/boot-cljs-repl     "0.3.3"      :scope "test"]
-                 [adzerk/boot-reload        "0.4.13"      :scope "test"]
+                 [adzerk/boot-reload        "0.4.13"     :scope "test"]
                  [pandeiro/boot-http        "0.7.6"      :scope "test"]
                  [com.cemerick/piggieback   "0.2.1"      :scope "test"]
                  [org.clojure/tools.nrepl   "0.2.12"     :scope "test"]
@@ -13,9 +14,23 @@
                  [reagent "0.6.0"]
                  [org.martinklepsch/boot-garden "1.3.2-0" :scope "test"]
                  [binaryage/devtools "0.9.0" :scope "test"]
-                 [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]])
+                 [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
+
+                 ;; system
+                 [environ "1.1.0"]
+                 [boot-environ "1.1.0"]
+                 [org.danielsz/system "0.4.0"]
+
+                 ;; backend
+                 [ring/ring-core "1.6.0-RC3"]
+                 [ring/ring-jetty-adapter "1.6.0-RC3"]])
 
 (require
+ '[environ.boot :refer [environ]]
+ '[speech.main :refer [-main]]
+ '[speech.systems :refer [dev-system]]
+ '[system.boot :refer [system]]
+
  '[adzerk.boot-cljs      :refer [cljs]]
  '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
  '[adzerk.boot-reload    :refer [reload]]
@@ -24,52 +39,94 @@
  '[org.martinklepsch.boot-garden :refer [garden]]
  '[powerlaces.boot-cljs-devtools :refer [cljs-devtools dirac]])
 
-(deftask build []
+(deftask build-frontend []
   (comp
-        (cljs)
-        (garden :styles-var 'speech.styles/screen
-:output-to "css/garden.css")))
+   (cljs)
+   (garden :styles-var 'speech.styles/screen
+           :output-to "css/garden.css")))
 
 (deftask run []
-  (comp (serve)
-        (watch)
+  (comp (serve :port 3000)
+        (watch :verbose true)
+        (system :sys #'dev-system :auto true :files [".*"] :regexes true)
         (cljs-repl)
         (cljs-devtools)
         (reload)
-        (build)))
+        (build-frontend)))
 
 (deftask production []
   (task-options! cljs {:optimizations :advanced}
-                      garden {:pretty-print false})
+                 garden {:pretty-print false})
   identity)
 
 (deftask development []
-  (task-options! cljs {:optimizations :none}
+  (task-options! cljs {:optimizations :none :source-map true}
                  reload {:on-jsload 'speech.app/init})
   identity)
 
 (deftask dev
   "Simple alias to run application in development mode"
   []
-  (comp (development)
-        (run)))
+  (comp
+   (environ :env {:http-port "4000"})
+   (development)
+   (run)))
 
+(deftask start-capture []
+  (comp
+   ;; (environ :env {:buffer-size "4000"})
+   (-main)
+   identity))
 
-(deftask testing []
-  (set-env! :source-paths #(conj % "test/cljs"))
+(deftask build-jar
+  "Builds an uberjar of this project that can be run with java -jar"
+  []
+  (comp
+   (aot :namespace #{'speech.main})
+   (uber)
+   (jar :file "speech.jar" :main 'speech.main)
+   (sift :include #{#"speech.jar"})
+   (target)))
+
+(deftask deploy []
+  (sh "scp" "target/speech.jar" "orangepi:speech")
   identity)
 
-;;; This prevents a name collision WARNING between the test task and
-;;; clojure.core/test, a function that nobody really uses or cares
-;;; about.
-(ns-unmap 'boot.user 'test)
+;; (deftask dev []
+;;   (comp
+;;    (environ :env {:http-port "4000"})
+;;    (watch :verbose true)
+;;    (system :sys #'dev-system :auto true :files [".*"] :regexes true)
+;;    (cljs-repl)
+;;    (cljs-devtools)
+;;    (reload) ;; fighweel replacement
+;;    (cljs :source-map true)
+;;    (repl :server true)))
 
-(deftask test []
-  (comp (testing)
-        (test-cljs :js-env :phantom
-                   :exit?  true)))
+;;;;;;;;;;;;;;;;;;;;;; TESTING stuff from the template
+;; (deftask testing []
+;;   (set-env! :source-paths #(conj % "test/cljs"))
+;;   identity)
 
-(deftask auto-test []
-  (comp (testing)
-        (watch)
-        (test-cljs :js-env :phantom)))
+;; ;;; This prevents a name collision WARNING between the test task and
+;; ;;; clojure.core/test, a function that nobody really uses or cares
+;; ;;; about.
+;; (ns-unmap 'boot.user 'test)
+
+;; (deftask test []
+;;   (comp (testing)
+;;         (test-cljs :js-env :phantom
+;;                    :exit?  true)))
+
+;; (deftask auto-test []
+;;   (comp (testing)
+;;         (watch)
+;;         (test-cljs :js-env :phantom)))
+
+(comment
+  (boot (build))
+  (boot (deploy))
+  (boot (dev))
+  (load-file "build.boot")
+  (boot (start-capture))
+  )
