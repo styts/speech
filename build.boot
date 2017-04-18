@@ -1,7 +1,22 @@
 (set-env!
  :source-paths    #{"src/cljs" "src/clj"}
  :resource-paths  #{"resources"}
- :dependencies '[;; frontend
+ :dependencies '[
+                 ;; system
+                 [org.clojure/clojure "1.8.0"]
+                 [environ "1.1.0"]
+                 [boot-environ "1.1.0"]
+                 [org.danielsz/system "0.4.0"]
+
+                 ;; reply things
+                 [cider/cider-nrepl "0.15.0-snapshot"]
+                 [refactor-nrepl "2.2.0"]
+
+                 ;; backend
+                 [ring/ring-core "1.6.0-RC3"]
+                 [ring/ring-jetty-adapter "1.6.0-RC3"]
+
+                 ;; frontend
                  [adzerk/boot-cljs          "1.7.228-2"  :scope "test"]
                  [adzerk/boot-cljs-repl     "0.3.3"      :scope "test"]
                  [adzerk/boot-reload        "0.4.13"     :scope "test"]
@@ -12,24 +27,18 @@
                  [org.clojure/clojurescript "1.9.293"]
                  [crisptrutski/boot-cljs-test "0.3.0" :scope "test"]
                  [reagent "0.6.0"]
+                 [garden "1.3.2"]
                  [org.martinklepsch/boot-garden "1.3.2-0" :scope "test"]
                  [binaryage/devtools "0.9.0" :scope "test"]
                  [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
-
-                 ;; system
-                 [environ "1.1.0"]
-                 [boot-environ "1.1.0"]
-                 [org.danielsz/system "0.4.0"]
-
-                 ;; backend
-                 [ring/ring-core "1.6.0-RC3"]
-                 [ring/ring-jetty-adapter "1.6.0-RC3"]])
+                 ])
 
 (require
  '[environ.boot :refer [environ]]
- '[speech.main :refer [-main]]
- '[speech.systems :refer [dev-system]]
  '[system.boot :refer [system]]
+
+ '[speech.systems :refer [dev-system]]
+ '[speech.microphone :refer [capture]]
 
  '[adzerk.boot-cljs      :refer [cljs]]
  '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
@@ -48,7 +57,7 @@
 (deftask run []
   (comp (serve :port 3000)
         (watch :verbose true)
-        (system :sys #'dev-system :auto true :files [".*"] :regexes true)
+        (system :sys #'dev-system :auto true :files ["clj(s)$"] :regexes true)
         (cljs-repl)
         (cljs-devtools)
         (reload)
@@ -74,8 +83,8 @@
 
 (deftask start-capture []
   (comp
-   ;; (environ :env {:buffer-size "4000"})
-   (-main)
+   (environ :env {:buffer-size "4000"} :verbose true)
+   (capture)
    identity))
 
 (deftask build-jar

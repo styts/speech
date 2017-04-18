@@ -36,7 +36,7 @@
 
    (println (.getFormat line))
 
-   (def buffer-size (Integer. (env :buffer-size "20")))
+   (def buffer-size (Integer. (env :buffer-size "800")))
 
    (def buffer (byte-array buffer-size))
 
