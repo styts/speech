@@ -1,0 +1,3 @@
+{:require  [speech.app]
+ :init-fns [speech.app/init]
+ :compiler-options {:asset-path "js/app.out"}}
