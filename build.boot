@@ -3,6 +3,8 @@
  :resource-paths  #{"resources"}
  :dependencies '[;; system
                  [org.clojure/clojure "1.8.0"]
+                 [org.clojure/tools.reader "0.9.2"]
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [environ "1.1.0"]
                  [boot-environ "1.1.0"]
                  [org.danielsz/system "0.4.0"]
@@ -12,8 +14,8 @@
                  [refactor-nrepl "2.2.0"]
 
                  ;; backend
-                 [ring/ring-core "1.6.0-RC3"]
-                 [ring/ring-jetty-adapter "1.6.0-RC3"]
+                 [compojure "1.3.4"] ;; defroutes
+                 [jarohen/chord "0.6.0"] ;; websockets
 
                  ;; frontend
                  [adzerk/boot-cljs          "1.7.228-2"  :scope "test"]
@@ -34,7 +36,6 @@
 (require
  '[environ.boot :refer [environ]]
  '[system.boot :refer [system]]
-
  '[speech.systems :refer [dev-system]]
  '[speech.microphone]
  '[adzerk.boot-cljs      :refer [cljs]]
@@ -72,7 +73,8 @@
    (cljs-devtools)
    (reload)
    (build-frontend)
-   (repl :server true)))
+   ;; (repl :server true)
+))
 
 (deftask start-capture []
   (comp
@@ -134,6 +136,7 @@
 
   ;; to ensure dev task is not blocking, it's executed as a future
   (def dev-future (future (boot (dev))))
+  (.start (:web (dev-system)))
   (future-cancel dev-future)
 
   (+ 1 2)

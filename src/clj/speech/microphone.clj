@@ -1,6 +1,7 @@
 (ns speech.microphone
-  (:require [environ.core :refer [env]]
-            [com.stuartsierra.component :as component]))
+  (:require [com.stuartsierra.component :as component]
+            [environ.core :refer [env]]
+            [speech.web :refer [send-data-to-ws]]))
 
 ;; globals
 (def audioformat (new javax.sound.sampled.AudioFormat 8000 16 1 true false))
@@ -14,7 +15,7 @@
   (/ (apply + numbers) (count numbers)))
 
 ;; handler for new microphone data
-(defn print-data
+(defn calculations
   ;; (println (reduce + buf)
   [data]
   ["total:" (count data)
@@ -35,7 +36,8 @@
   (repeatedly
    (fn []
      (.read line buffer 0 buffer-size)
-     (print-data buffer)))
+     (println (take 10 buffer))
+     (send-data-to-ws (calculations buffer))))
 
   (.close line)
   ;; return the line, stored in system. needs to be closed later

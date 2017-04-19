@@ -2,7 +2,7 @@
   (:require
    [system.core :refer [defsystem]]
    [com.stuartsierra.component :as component]
-   (system.components [jetty :refer [new-web-server]])
+   (system.components [http-kit :refer [new-web-server]])
    [speech.web :refer [app]]
    [speech.microphone :refer [create-system]]
    [environ.core :refer [env]]))
