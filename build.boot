@@ -53,10 +53,9 @@
    (garden :styles-var 'speech.styles/screen
            :output-to "css/garden.css")))
 
-(deftask run []
+(deftask watch-frontend []
   (comp (serve :port 3000)
         (watch :verbose true)
-        (system :sys #'dev-system :auto true :files ["clj(s)$"] :regexes true)
         (cljs-repl)
         (cljs-devtools)
         (reload)
@@ -77,8 +76,9 @@
   []
   (comp
    (environ :env {:http-port "4000"})
+   (system :sys #'dev-system :auto true :files ["microphone.clj" "web.clj"])
    (development)
-   (run)))
+   (watch-frontend)))
 
 (deftask start-capture []
   (comp
@@ -90,6 +90,7 @@
   "Builds an uberjar of this project that can be run with java -jar"
   []
   (comp
+   (build-frontend)
    (aot :namespace #{'speech.main})
    (uber)
    (jar :file "speech.jar" :main 'speech.main)
@@ -135,6 +136,7 @@
   (boot (build))
   (boot (deploy))
   (boot (dev))
+  (+ 1 2)
   (load-file "build.boot")
   (boot (start-capture))
   )
