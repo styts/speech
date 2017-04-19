@@ -19,8 +19,7 @@
   [data]
   ["total:" (count data)
    "max:" (apply max (map abs data))
-   "average:" (int (average (map abs data)))
-])
+   "average:" (int (average (map abs data)))])
 
 ;; main thread for getting new microphone data
 (defn start-capture []
@@ -33,10 +32,10 @@
   ;; print format
   (println (.getFormat line))
 
-  (print (repeatedly
-          (fn []
-            (.read line buffer 0 buffer-size)
-            (println (print-data buffer)))))
+  (repeatedly
+   (fn []
+     (.read line buffer 0 buffer-size)
+     (print-data buffer)))
 
   (.close line)
   ;; return the line, stored in system. needs to be closed later
