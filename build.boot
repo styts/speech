@@ -1,8 +1,7 @@
 (set-env!
  :source-paths    #{"src/cljs" "src/clj"}
  :resource-paths  #{"resources"}
- :dependencies '[
-                 ;; system
+ :dependencies '[;; system
                  [org.clojure/clojure "1.8.0"]
                  [environ "1.1.0"]
                  [boot-environ "1.1.0"]
@@ -30,8 +29,7 @@
                  [garden "1.3.2"]
                  [org.martinklepsch/boot-garden "1.3.2-0" :scope "test"]
                  [binaryage/devtools "0.9.0" :scope "test"]
-                 [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
-                 ])
+                 [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]])
 
 (require
  '[environ.boot :refer [environ]]
@@ -51,20 +49,10 @@
   (comp
    (cljs)
    (garden :styles-var 'speech.styles/screen
-           :output-to "css/garden.css")))
-
-(deftask watch-frontend []
-  (comp (serve :port 3000)
-        (watch :verbose true)
-        (cljs-repl)
-        (cljs-devtools)
-        (reload)
-        (build-frontend)))
-
-(deftask production []
-  (task-options! cljs {:optimizations :advanced}
-                 garden {:pretty-print false})
-  identity)
+           :output-to "css/garden.css"))) (deftask production []
+                                            (task-options! cljs {:optimizations :advanced}
+                                                           garden {:pretty-print false})
+                                            identity)
 
 (deftask development []
   (task-options! cljs {:optimizations :none :source-map true}
@@ -78,7 +66,13 @@
    (environ :env {:http-port "4000"})
    (system :sys #'dev-system :auto true :files ["microphone.clj" "web.clj"])
    (development)
-   (watch-frontend)))
+   (serve :port 3000)
+   (watch :verbose true)
+   (cljs-repl)
+   (cljs-devtools)
+   (reload)
+   (build-frontend)
+   (repl :server true)))
 
 (deftask start-capture []
   (comp
@@ -135,8 +129,14 @@
 (comment
   (boot (build))
   (boot (deploy))
+
   (boot (dev))
+
+  ;; to ensure dev task is not blocking, it's executed as a future
+  (def dev-future (future (boot (dev))))
+  (future-cancel dev-future)
+
   (+ 1 2)
+
   (load-file "build.boot")
-  (boot (start-capture))
-  )
+  (boot (start-capture)))
