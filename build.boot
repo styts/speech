@@ -38,8 +38,7 @@
  '[system.boot :refer [system]]
 
  '[speech.systems :refer [dev-system]]
- '[speech.microphone :refer [capture]]
-
+ '[speech.microphone]
  '[adzerk.boot-cljs      :refer [cljs]]
  '[adzerk.boot-cljs-repl :refer [cljs-repl start-repl]]
  '[adzerk.boot-reload    :refer [reload]]
@@ -84,7 +83,7 @@
 (deftask start-capture []
   (comp
    (environ :env {:buffer-size "4000"} :verbose true)
-   (capture)
+   (speech.microphone/start-capture)
    identity))
 
 (deftask build-jar

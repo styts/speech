@@ -1,5 +1,11 @@
 (ns speech.microphone
-  (:require [environ.core :refer [env]]))
+  (:require [environ.core :refer [env]]
+            [com.stuartsierra.component :as component]))
+
+;; globals
+(def audioformat (new javax.sound.sampled.AudioFormat 8000 16 1 true false))
+(def buffer-size (Integer. (env :buffer-size "800")))
+(def buffer (byte-array buffer-size))
 
 ;; helpers
 (defn abs [n] (max n (- n)))
@@ -11,50 +17,39 @@
 (defn print-data
   ;; (println (reduce + buf)
   [data]
-  ["total:"
-   (count data)
-   "max:"
-   (apply max (map abs data))
-   "average:"
-   (int (average (map abs data)))
-   ;; (take 20 data)
+  ["total:" (count data)
+   "max:" (apply max (map abs data))
+   "average:" (int (average (map abs data)))
 ])
 
 ;; main thread for getting new microphone data
-(defn capture
+(defn start-capture []
   "captures some audio from the microphone"
-  ([] (capture print-data))
-  ([seconds] (capture print-data seconds))
-  ([callback seconds]
+  (def line (javax.sound.sampled.AudioSystem/getTargetDataLine audioformat))
 
-   ;; setup the device
-   (def audioformat (new javax.sound.sampled.AudioFormat 8000 16 1 true false))
-   (def line (javax.sound.sampled.AudioSystem/getTargetDataLine audioformat))
+  (.open line)
+  (.start line)
 
-   (.open line)
-   (.start line)
+  ;; print format
+  (println (.getFormat line))
 
-   (println (.getFormat line))
+  (print (repeatedly
+          (fn []
+            (.read line buffer 0 buffer-size)
+            (println (print-data buffer)))))
 
-   (def buffer-size (Integer. (env :buffer-size "800")))
+  (.close line)
+  ;; return the line, stored in system. needs to be closed later
+  line)
 
-   (def buffer (byte-array buffer-size))
+(defrecord Capture []
+  component/Lifecycle
+  (start [this]
+    (assoc this :microphone (start-capture)))
+  (stop [this]
+    (.close (:microphone this)) ;; close the recording line
+    (dissoc this :microphone)
+    (println "Stopped microphone recording")))
 
-   (print (repeatedly
-           (fn []
-             (.read line buffer 0 buffer-size)
-             (println (callback buffer)))))
-
-   (.close line)))
-
-(comment
-  (capture)
-  (+ 1 2)
-
-  (env)
-  (read-string "400")
-  (doc-find "average")
-  (average [2 1])
-  (apply max [2 1])
-  (print-data buffer)
-  (def seconds 4))
+(defn create-system []
+  (Capture.))
