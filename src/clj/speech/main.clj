@@ -1,7 +1,8 @@
 (ns speech.main
   (:gen-class)
-  (:require [speech.microphone :refer [start-capture]]))
+  (:require [speech.systems :refer [prod-system]]
+            [system.repl :refer [set-init! start]]))
 
 (defn -main [& args]
-  (println "Starting capture:")
-  (speech.microphone/start-capture))
+  (set-init! #'prod-system)
+  (start))

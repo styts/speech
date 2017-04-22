@@ -17,6 +17,9 @@
                  [compojure "1.3.4"] ;; defroutes
                  [jarohen/chord "0.6.0"] ;; websockets
 
+                 ;; utilities
+                 [cheshire "5.7.1"]
+
                  ;; frontend
                  [adzerk/boot-cljs          "1.7.228-2"  :scope "test"]
                  [adzerk/boot-cljs-repl     "0.3.3"      :scope "test"]
@@ -32,7 +35,7 @@
                  [org.martinklepsch/boot-garden "1.3.2-0" :scope "test"]
                  [binaryage/devtools "0.9.0" :scope "test"]
                  [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
-                 [cheshire "5.7.1"]])
+                 ])
 
 (require
  '[environ.boot :refer [environ]]
@@ -81,16 +84,11 @@
    (reload)
    (build-frontend)))
 
-(deftask start-capture []
-  (comp
-   (environ :env {:buffer-size "4000"} :verbose true)
-   (speech.microphone/start-capture)
-   identity))
-
 (deftask build-jar
   "Builds an uberjar of this project that can be run with java -jar"
   []
   (comp
+   (production)
    (build-frontend)
    (aot :namespace #{'speech.main})
    (uber)
@@ -101,54 +99,3 @@
 (deftask deploy []
   (sh "scp" "target/speech.jar" "orangepi:speech")
   identity)
-
-;; (deftask dev []
-;;   (comp
-;;    (environ :env {:http-port "4000"})
-;;    (watch :verbose true)
-;;    (system :sys #'dev-system :auto true :files [".*"] :regexes true)
-;;    (cljs-repl)
-;;    (cljs-devtools)
-;;    (reload) ;; fighweel replacement
-;;    (cljs :source-map true)
-;;    (repl :server true)))
-
-;;;;;;;;;;;;;;;;;;;;;; TESTING stuff from the template
-;; (deftask testing []
-;;   (set-env! :source-paths #(conj % "test/cljs"))
-;;   identity)
-
-;; ;;; This prevents a name collision WARNING between the test task and
-;; ;;; clojure.core/test, a function that nobody really uses or cares
-;; ;;; about.
-;; (ns-unmap 'boot.user 'test)
-
-;; (deftask test []
-;;   (comp (testing)
-;;         (test-cljs :js-env :phantom
-;;                    :exit?  true)))
-
-;; (deftask auto-test []
-;;   (comp (testing)
-;;         (watch)
-;;         (test-cljs :js-env :phantom)))
-
-(comment
-  (boot (build))
-  (boot (deploy))
-
-  (boot (dev))
-
-  ;; to ensure dev task is not blocking, it's executed as a future
-  (def frontend-future (future (boot (frontend))))
-  (future-cancel frontend-future)
-
-  (boot (backend))
-
-  (.start (:web (dev-system)))
-  (system.repl/system)
-
-  (+ 1 2)
-
-  (load-file "build.boot")
-  (boot (start-capture)))

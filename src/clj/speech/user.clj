@@ -3,8 +3,6 @@
             [speech.systems :refer [dev-system]]))
 
 (comment
-  (println "USER NS evaluated")
-
   (set-init! #'dev-system)
 
   (reset))
