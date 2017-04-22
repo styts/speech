@@ -8,5 +8,5 @@
    [environ.core :refer [env]]))
 
 (defsystem dev-system
-  [:web (new-web-server (Integer. (env :http-port)) app)
+  [:web (new-web-server (Integer. (env :http-port "4000")) app)
    :microphone (create-system)])

@@ -31,7 +31,8 @@
                  [garden "1.3.2"]
                  [org.martinklepsch/boot-garden "1.3.2-0" :scope "test"]
                  [binaryage/devtools "0.9.0" :scope "test"]
-                 [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]])
+                 [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
+                 [cheshire "5.7.1"]])
 
 (require
  '[environ.boot :refer [environ]]
@@ -50,31 +51,35 @@
   (comp
    (cljs)
    (garden :styles-var 'speech.styles/screen
-           :output-to "css/garden.css"))) (deftask production []
-                                            (task-options! cljs {:optimizations :advanced}
-                                                           garden {:pretty-print false})
-                                            identity)
+           :output-to "css/garden.css")))
+
+(deftask production []
+  (task-options! cljs {:optimizations :advanced}
+                 garden {:pretty-print false})
+  identity)
 
 (deftask development []
   (task-options! cljs {:optimizations :none :source-map true}
                  reload {:on-jsload 'speech.app/init})
   identity)
 
-(deftask dev
-  "Simple alias to run application in development mode"
-  []
+(deftask backend []
   (comp
    (environ :env {:http-port "4000"})
    (system :sys #'dev-system :auto true :files ["microphone.clj" "web.clj"])
+   identity))
+
+(deftask frontend
+  "Simple alias to run application in development mode"
+  []
+  (comp
+   (watch :verbose true)
    (development)
    (serve :port 3000)
-   (watch :verbose true)
    (cljs-repl)
    (cljs-devtools)
    (reload)
-   (build-frontend)
-   ;; (repl :server true)
-))
+   (build-frontend)))
 
 (deftask start-capture []
   (comp
@@ -135,9 +140,13 @@
   (boot (dev))
 
   ;; to ensure dev task is not blocking, it's executed as a future
-  (def dev-future (future (boot (dev))))
+  (def frontend-future (future (boot (frontend))))
+  (future-cancel frontend-future)
+
+  (boot (backend))
+
   (.start (:web (dev-system)))
-  (future-cancel dev-future)
+  (system.repl/system)
 
   (+ 1 2)
 

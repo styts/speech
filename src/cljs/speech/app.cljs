@@ -3,7 +3,9 @@
             [clojure.core :refer [pr-str]]
             [clojure.core.async :refer [<!]]
             [reagent.core :as reagent])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
+
+(enable-console-print!)
 
 (defn some-component []
   [:div
@@ -21,8 +23,21 @@
   (reagent/render-component [calling-component]
                             (.getElementById js/document "container")))
 
-;; messages from the websocket
-(go
-  (let [{:keys [ws-channel]} (<! (ws-ch "ws://localhost:4000/ws"))
-        {:keys [message]} (<! ws-channel)]
-    (js/console.log "Got message from server:" (pr-str message))))
+(defn receive-msgs! [server-ch]
+  ;; every time we get a message from the server, add it to our list
+  (go-loop []
+    (let [{:keys [message error] :as msg} (<! server-ch)]
+      (js/console.log message)
+      (when message
+        (recur)))))
+
+(set!
+ (.-onload js/window)
+ (fn []
+   (go
+     (let [{:keys [ws-channel error]} (<! (ws-ch "ws://localhost:4000/ws"))]
+       (js/console.log "connected to channel: " ws-channel)
+       (if error
+         (js/console.log "Couldn't connect to websocket: " error)
+         ;; register handler for listening to ws
+         (receive-msgs! ws-channel))))))

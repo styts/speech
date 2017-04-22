@@ -1,12 +1,13 @@
 (ns speech.web
   (:require [boot.util :refer [info]]
+            [cheshire.core :refer [generate-string]]
             clojure.core
             [compojure
              [core :refer [defroutes GET]]
              [route :refer [not-found]]]
-            [org.httpkit.server :refer [on-close on-receive send! with-channel]]))
+            [org.httpkit.server :refer [on-close send! with-channel]]))
 
-(def channel-hub (atom {}))
+(defonce channel-hub (atom {}))
 
 (defn hello-handler [request]
   {:status 200
@@ -15,15 +16,19 @@
 
 (defn- ws-handler [req]
   (with-channel req channel
-    (info "opened channel" channel)
+    (info "channel opened" channel)
     (swap! channel-hub assoc channel req) ;; store the channel
-    ;; register handlers
-    (on-close channel (fn [status] (info "channel closed")))
-    (on-receive channel (fn [data] (send! channel data)))))
+    (on-close channel (fn [status] (info "channel closed")))))
 
 (defn send-data-to-ws [data]
   (doseq [channel (keys @channel-hub)]
-    (send! channel "message sent to a channel")))
+    ;; (info "sent to channel")
+    (send! channel data)))
+
+(comment
+  (swap! channel-hub {})
+  (count @channel-hub)
+  (send-data-to-ws (generate-string [1 2 3])))
 
 (defroutes app
   (GET "/" [] hello-handler)

@@ -1,6 +1,8 @@
 (ns speech.microphone
-  (:require [com.stuartsierra.component :as component]
+  (:require [cheshire.core :refer [generate-string]]
+            [com.stuartsierra.component :as component]
             [environ.core :refer [env]]
+            [clojure.core.async :refer [go-loop]]
             [speech.web :refer [send-data-to-ws]]))
 
 ;; globals
@@ -32,14 +34,16 @@
 
   ;; print format
   (println (.getFormat line))
+  (println "buffer size. desired:" buffer-size "real:" (.getBufferSize line))
 
-  (repeatedly
-   (fn []
-     (.read line buffer 0 buffer-size)
-     (println (take 10 buffer))
-     (send-data-to-ws (calculations buffer))))
+  (go-loop []
+      (.read line buffer 0 buffer-size)
+      (-> buffer
+          calculations
+          generate-string
+          send-data-to-ws)
+      (recur))
 
-  (.close line)
   ;; return the line, stored in system. needs to be closed later
   line)
 
@@ -50,7 +54,8 @@
   (stop [this]
     (.close (:microphone this)) ;; close the recording line
     (dissoc this :microphone)
-    (println "Stopped microphone recording")))
+    (println "Stopped microphone recording")
+    this))
 
 (defn create-system []
   (Capture.))
