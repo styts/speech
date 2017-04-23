@@ -17,7 +17,6 @@
 
 (defn send-data-to-ws [data]
   (doseq [channel (keys @channel-hub)]
-    ;; (info "sent to channel")
     (send! channel data)))
 
 (defroutes app

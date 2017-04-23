@@ -3,8 +3,12 @@
             [garden.stylesheet :refer [rule]]))
 
 (defstyles screen
-  (let [body (rule :body)]
-    (body
-     {:font-family "Helvetica Neue"
-      :font-size   "16px"
-      :line-height 1.5})))
+  [:body {:font-family "Helvetica Neue"
+          :font-size   "16px"
+          :line-height 1.5}]
+  [:.ct-chart
+   [:.ct-series-a
+    [:.ct-line
+     {:stroke "#ccf"
+      :stroke-width "1px"}]
+    [:.ct-area {:fill "#bbf"}]]])

@@ -7,7 +7,7 @@
 
 ;; globals
 (def audioformat (new javax.sound.sampled.AudioFormat 8000 16 1 true false))
-(def buffer-size (Integer. (env :buffer-size "800")))
+(def buffer-size (Integer. (env :buffer-size "2000")))
 (def buffer (byte-array buffer-size))
 
 ;; helpers
@@ -20,9 +20,12 @@
 (defn calculations
   ;; (println (reduce + buf)
   [data]
-  ["total:" (count data)
-   "max:" (apply max (map abs data))
-   "average:" (int (average (map abs data)))])
+  {:total (count data)
+   :max (apply max (map abs data))
+   :average (int (average (map abs data)))
+   }
+  ;; (take 100000 data)
+  )
 
 ;; main thread for getting new microphone data
 (defn start-capture []
@@ -37,15 +40,20 @@
   (println "buffer size. desired:" buffer-size "real:" (.getBufferSize line))
 
   (go-loop []
-      (.read line buffer 0 buffer-size)
-      (-> buffer
-          calculations
-          generate-string
-          send-data-to-ws)
-      (recur))
+    (.read line buffer 0 buffer-size)
+    (-> buffer
+        calculations
+        generate-string
+        send-data-to-ws)
+    (recur))
 
   ;; return the line, stored in system. needs to be closed later
   line)
+
+(comment
+  (-> buffer
+      calculations
+      generate-string))
 
 (defrecord Capture []
   component/Lifecycle

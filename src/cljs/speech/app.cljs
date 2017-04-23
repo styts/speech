@@ -1,32 +1,44 @@
 (ns speech.app
   (:require [chord.client :refer [ws-ch]]
-            [clojure.core :refer [pr-str]]
+            [clojure.core :refer [swap!]]
             [clojure.core.async :refer [<!]]
-            [reagent.core :as reagent])
+            [reagent.core :as reagent]
+            [speech.graph :refer [chart-component update-chart]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
+
+(defonce buffer (reagent.ratom/atom (repeat 100 0)))
 
 (enable-console-print!)
 
 (defn calling-component []
-  [:div "Hello"])
+  [:div
+   [chart-component buffer]])
 
 (defn init []
   (reagent/render-component [calling-component]
                             (.getElementById js/document "container")))
 
+(defn add-message [buffer message]
+  (let [avg (:average message)]
+    (take 100 (conj buffer avg))))
+
 (defn receive-msgs! [server-ch]
   ;; every time we get a message from the server, add it to our list
   (go-loop []
     (let [{:keys [message error] :as msg} (<! server-ch)]
-      (js/console.log message)
-      (when message
+      (if error
+        (js/console.error error)
+        (do
+          (swap! buffer add-message message)
+          (update-chart (reverse @buffer))))
+      (when msg
         (recur)))))
 
 (set!
  (.-onload js/window)
  (fn []
    (go
-     (let [{:keys [ws-channel error]} (<! (ws-ch "ws://localhost:4000/ws"))]
+     (let [{:keys [ws-channel error]} (<! (ws-ch "ws://localhost:4000/ws" {:format :json-kw}))]
        (js/console.log "connected to channel: " ws-channel)
        (if error
          (js/console.log "Couldn't connect to websocket: " error)
