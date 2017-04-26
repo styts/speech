@@ -6,7 +6,8 @@
             [speech.graph :refer [chart-component update-chart]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
-(defonce buffer (reagent.ratom/atom (repeat 100 0)))
+(def chart-size 600)
+(defonce buffer (reagent.ratom/atom (repeat chart-size 0)))
 
 (enable-console-print!)
 
@@ -19,8 +20,7 @@
                             (.getElementById js/document "container")))
 
 (defn add-message [buffer message]
-  (let [avg (:average message)]
-    (take 100 (conj buffer avg))))
+  (take chart-size (conj buffer message)))
 
 (defn receive-msgs! [server-ch]
   ;; every time we get a message from the server, add it to our list
@@ -29,7 +29,8 @@
       (if error
         (js/console.error error)
         (do
-          (swap! buffer add-message message)
+          (doseq [m message]
+            (swap! buffer add-message m))
           (update-chart (reverse @buffer))))
       (when msg
         (recur)))))

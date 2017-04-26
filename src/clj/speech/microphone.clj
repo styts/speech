@@ -1,31 +1,15 @@
 (ns speech.microphone
-  (:require [cheshire.core :refer [generate-string]]
+  (:require [clojure.core.async :refer [close! go-loop]]
             [com.stuartsierra.component :as component]
             [environ.core :refer [env]]
-            [clojure.core.async :refer [go-loop]]
-            [speech.web :refer [send-data-to-ws]]))
+            [speech
+             [utils :refer [calculations]]
+             [web :refer [add-data-to-buffer-and-maybe-send]]]))
 
 ;; globals
 (def audioformat (new javax.sound.sampled.AudioFormat 8000 16 1 true false))
-(def buffer-size (Integer. (env :buffer-size "2000")))
+(def buffer-size (Integer. (env :buffer-size "20")))
 (def buffer (byte-array buffer-size))
-
-;; helpers
-(defn abs [n] (max n (- n)))
-
-(defn average [numbers]
-  (/ (apply + numbers) (count numbers)))
-
-;; handler for new microphone data
-(defn calculations
-  ;; (println (reduce + buf)
-  [data]
-  {:total (count data)
-   :max (apply max (map abs data))
-   :average (int (average (map abs data)))
-   }
-  ;; (take 100000 data)
-  )
 
 ;; main thread for getting new microphone data
 (defn start-capture []
@@ -39,31 +23,28 @@
   (println (.getFormat line))
   (println "buffer size. desired:" buffer-size "real:" (.getBufferSize line))
 
-  (go-loop []
-    (.read line buffer 0 buffer-size)
-    (-> buffer
-        calculations
-        generate-string
-        send-data-to-ws)
-    (recur))
-
   ;; return the line, stored in system. needs to be closed later
-  line)
-
-(comment
-  (-> buffer
-      calculations
-      generate-string))
+  {:line line
+   :loop
+   (go-loop []
+     (.read line buffer 0 buffer-size)
+     (-> buffer
+         calculations
+         :average
+         add-data-to-buffer-and-maybe-send)
+     (recur))})
 
 (defrecord Capture []
   component/Lifecycle
   (start [this]
     (assoc this :microphone (start-capture)))
   (stop [this]
-    (.close (:microphone this)) ;; close the recording line
-    (dissoc this :microphone)
-    (println "Stopped microphone recording")
-    this))
+    (let [{:keys [loop line]} (:microphone this)]
+      (.close line) ;; close the recording line
+      (close! loop) ;; terminate the go-loop channel
+      (dissoc this :microphone)
+      (println "Stopped microphone recording")
+      this)))
 
 (defn create-system []
   (Capture.))
