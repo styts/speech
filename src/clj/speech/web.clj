@@ -6,6 +6,7 @@
             [compojure
              [core :refer [defroutes GET]]
              [route :refer [not-found]]]
+            [speech.utils :refer [average split-by]]
             [org.httpkit
              [server :refer [close on-close send! with-channel]]
              [timer :refer [schedule-task]]]
@@ -28,7 +29,7 @@
     (on-close channel (fn [status] (println "live channel closed" status)))
     (go-loop []
       (let [audio (<! audio-channel)]
-        (send! channel (str audio "\n") false)
+        (send! channel (str (doall audio) "\n") false)
         (recur)))))
 
 (defn send-data-to-ws [data]
@@ -36,10 +37,10 @@
     (send! channel data)))
 
 (defn add-data-to-buffer-and-maybe-send [data]
-  (if (> (count @buffer) 20)
+  (if (> (count @buffer) 50)
     (do
       (-> average
-          (map (split-by 10 @buffer))
+          (map (split-by 15 @buffer))
           generate-string
           send-data-to-ws)
       (reset! buffer []))
