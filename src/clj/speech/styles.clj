@@ -6,6 +6,7 @@
   [:body {:font-family "Helvetica Neue"
           :font-size   "16px"
           :line-height 1.5}]
+
   [:.ct-chart
    [:.ct-series-a
     [:.ct-line

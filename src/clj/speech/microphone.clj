@@ -1,19 +1,21 @@
 (ns speech.microphone
-  (:require [clojure.core.async :refer [close! go-loop]]
+  (:require [clojure.core.async :refer [chan close! go-loop put! sliding-buffer]]
             [com.stuartsierra.component :as component]
             [environ.core :refer [env]]
-            [speech
-             [utils :refer [calculations]]
-             [web :refer [add-data-to-buffer-and-maybe-send]]]))
+            [speech.utils :refer [abs calculations]]))
 
-;; globals
-(def audioformat (new javax.sound.sampled.AudioFormat 8000 16 1 true false))
-(def buffer-size (Integer. (env :buffer-size "20")))
-(def buffer (byte-array buffer-size))
+(def audio-channel (chan (sliding-buffer 20)))
+(def averages-channel (chan (sliding-buffer 20)))
 
 ;; main thread for getting new microphone data
 (defn start-capture []
-  "captures some audio from the microphone"
+  "captures some audio from the microphone and puts it into a buffer"
+
+  ;; globals
+  (def audioformat (new javax.sound.sampled.AudioFormat 8000 16 1 true false))
+  (def buffer-size (Integer. (env :buffer-size "20")))
+  (def buffer (byte-array buffer-size))
+
   (def line (javax.sound.sampled.AudioSystem/getTargetDataLine audioformat))
 
   (.open line)
@@ -25,14 +27,11 @@
 
   ;; return the line, stored in system. needs to be closed later
   {:line line
-   :loop
-   (go-loop []
-     (.read line buffer 0 buffer-size)
-     (-> buffer
-         calculations
-         :average
-         add-data-to-buffer-and-maybe-send)
-     (recur))})
+   :loop (go-loop []
+           (.read line buffer 0 buffer-size)
+           (put! audio-channel (map abs buffer))
+           (put! averages-channel (-> buffer calculations :average))
+           (recur))})
 
 (defrecord Capture []
   component/Lifecycle

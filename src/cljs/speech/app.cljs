@@ -6,7 +6,7 @@
             [speech.graph :refer [chart-component update-chart]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
-(def chart-size 600)
+(def chart-size 200)
 (defonce buffer (reagent.ratom/atom (repeat chart-size 0)))
 
 (enable-console-print!)
@@ -29,8 +29,8 @@
       (if error
         (js/console.error error)
         (do
-          (doseq [m message]
-            (swap! buffer add-message m))
+          (doseq [m message] (swap! buffer add-message m))
+          ;; (swap! buffer add-message message)
           (update-chart (reverse @buffer))))
       (when msg
         (recur)))))

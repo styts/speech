@@ -8,12 +8,10 @@
 
 ;; handler for new microphone data
 (defn calculations
-  ;; (println (reduce + buf)
   [data]
   {:total (count data)
    :max (apply max (map abs data))
    :average (int (average (map abs data)))}
-  ;; (take 100000 data)
 )
 
 (defn split-by
