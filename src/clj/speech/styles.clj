@@ -12,4 +12,11 @@
     [:.ct-line
      {:stroke "#ccf"
       :stroke-width "1px"}]
-    [:.ct-area {:fill "#bbf"}]]])
+    [:.ct-area {:fill "#bbf"}]]]
+
+  [:canvas {
+            :border "1px solid black"
+            :width "100%"
+            :height "200px"
+            }]
+  )

@@ -3,7 +3,9 @@
             [clojure.core :refer [swap!]]
             [clojure.core.async :refer [<!]]
             [reagent.core :as reagent]
+            [speech.canvas :refer [canvas-component]]
             [speech.graph :refer [chart-component update-chart]])
+
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (def chart-size 200)
@@ -13,7 +15,8 @@
 
 (defn calling-component []
   [:div
-   [chart-component buffer]])
+   [chart-component buffer]
+   [canvas-component]])
 
 (defn init []
   (reagent/render-component [calling-component]
