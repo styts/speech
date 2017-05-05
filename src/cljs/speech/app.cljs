@@ -3,9 +3,8 @@
             [clojure.core :refer [swap!]]
             [clojure.core.async :refer [<!]]
             [reagent.core :as reagent]
-            [speech.canvas :refer [canvas-component]]
+            [speech.canvas :refer [canvas-component push-raw-data]]
             [speech.graph :refer [chart-component update-chart]])
-
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (def chart-size 200)
@@ -13,17 +12,24 @@
 
 (enable-console-print!)
 
-(defn calling-component []
+(defn container []
   [:div
    [chart-component buffer]
    [canvas-component]])
 
 (defn init []
-  (reagent/render-component [calling-component]
-                            (.getElementById js/document "container")))
+  (reagent/render-component [container] (.getElementById js/document "container")))
 
 (defn add-message [buffer message]
-  (take chart-size (conj buffer message)))
+  (take (count buffer) (conj buffer message)))
+
+(defn- handle-message! [message]
+  (if (:raw message)
+    ;; handle raw
+    (push-raw-data (:raw message))
+
+    ;; otherwise, draw on main chart
+    (doseq [m message] (swap! buffer add-message m))))
 
 (defn receive-msgs! [server-ch]
   ;; every time we get a message from the server, add it to our list
@@ -32,8 +38,7 @@
       (if error
         (js/console.error error)
         (do
-          (doseq [m message] (swap! buffer add-message m))
-          ;; (swap! buffer add-message message)
+          (handle-message! message)
           (update-chart (reverse @buffer))))
       (when msg
         (recur)))))

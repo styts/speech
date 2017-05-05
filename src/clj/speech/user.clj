@@ -1,26 +1,24 @@
 (ns speech.user
   (:require [cheshire.core :refer [generate-string]]
-            [clojure.core.async :refer [buffer]]
             [speech
              [systems :refer [dev-system]]
-             [web :refer [add-data-to-buffer-and-maybe-send send-data-to-ws]]]
+             [web :refer [send-data-to-ws]]]
             [system.repl :refer [reset set-init! start stop]]))
 
 (set-init! #'dev-system)
+
+(defn ws-send
+  "shortcut for talking to websocket connection"
+  [data]
+  (send-data-to-ws (generate-string data)))
 
 (comment
   (reset)
 
   (start)
   (stop)
-  (+ 1 2)
 
-  (send-data-to-ws (generate-string [1 2]))
-  (add-data-to-buffer-and-maybe-send (generate-string [1 2]))
+  (ws-send {:raw [30 60]})
 
-  (send-data-to-ws (generate-string {:foo "bar"}))
-  @buffer
-  (count @buffer)
-
-  (buffer)
+  (ws-send "test")
 )
