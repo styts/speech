@@ -14,7 +14,8 @@
       :stroke-width "1px"}]
     [:.ct-area {:fill "#bbf"}]]]
 
-  [:canvas {;;:border "1px solid #eee"
-            :width "100%"
-            }]
+  [:canvas#canvas {;;:border "1px solid #eee"
+                   :width "100%"}]
+  [:canvas#spectrogram {:border "1px solid #eee"
+                   :width "100%"}]
   )

@@ -6,7 +6,8 @@
              [parameters :as parameters]
              [utils :refer [abs calculations]]]))
 
-(def audio-channel (chan (sliding-buffer 20)))
+(def audio-channel (chan (sliding-buffer 1)))
+
 (def averages-channel (chan (sliding-buffer 20)))
 
 (defn start-capture []
@@ -33,7 +34,7 @@
   {:line line
    :loop (go-loop []
            (.read line buffer 0 (count buffer))
-           (put! audio-channel (map abs buffer))
+           (put! audio-channel (map int buffer))
            (put! averages-channel (-> buffer calculations :average))
            (recur))})
 

@@ -8,7 +8,7 @@
              [route :refer [not-found]]]
             [org.httpkit.server :refer [on-close send! with-channel]]
             [speech
-             [microphone :refer [audio-channel averages-channel]]
+             [microphone :refer [audio-channel]]
              [parameters :as parameters]
              [utils :refer [average split-by]]]))
 
@@ -59,12 +59,6 @@
   "Shortcut for talking to the websocket connection"
   [data]
   (send-data-to-ws (generate-string data)))
-
-(go-loop []
-  (-> averages-channel
-      <!
-      add-data-to-buffer-and-maybe-send)
-  (recur))
 
 (defroutes app
   (GET "/ws" [] ws-handler)

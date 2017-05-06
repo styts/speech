@@ -12,6 +12,6 @@
   (start)
   (stop)
 
-  (ws-send {:raw [30 60]})
+  (ws-send {:fft [30 60 180 360 500 900 1400]})
   (ws-send "test")
 )

@@ -36,7 +36,9 @@
                  [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
                  [reagent "0.6.1"]
                  [weasel                    "0.7.0"      :scope "test"]
-                 ])
+
+                 [cfft "0.1.0"]
+                 [thi.ng/color "1.2.0"]])
 
 (require
  '[environ.boot :refer [environ]]

@@ -1,6 +1,7 @@
 (ns speech.canvas
   (:require clojure.core
             [reagent.core :as reagent]
+            [speech.drawing :refer [clear-canvas! random-color]]
             [speech.parameters :as parameters]))
 
 (enable-console-print!)
@@ -33,17 +34,13 @@
     (.translate ctx 0 h)
     (.scale ctx 1 -1)))
 
-(defn- clear-canvas! []
-  (let [ctx (.getContext (.getElementById js/document "canvas") "2d")]
-    (.clearRect ctx 0 0 w h)))
-
 (defn- add-to-buffer
   "if it has reached capacity, then clear canvas and return [message]
   otherwise (take n)"
   [b message]
   (let [has-reached-capacity? (>= (count b) capacity)]
     (if has-reached-capacity?
-      (do (clear-canvas!) [message])
+      (do (clear-canvas! "canvas") [message])
       (take capacity (conj b message)))))
 
 (defn- canvas-component []
@@ -60,10 +57,6 @@
         y1        0]
     [x1 y1 r-width r-height]))
 
-(defn- random-color "just for easier debugging" []
-  (let [colors ["red" "blue" "green" "cyan" "#ccc" "#aaa" "#999"]]
-    (rand-nth colors)))
-
 (defn- draw-on-canvas [new-data]
   (let [canvas (.getElementById js/document "canvas")
         ctx    (.getContext canvas "2d")
@@ -72,11 +65,11 @@
         coords (rect-coords idx size)
         x1     (nth coords 0)
         y1     (nth coords 1)
-        x2     (nth coords 2)
-        y2     (nth coords 3)]
+        rw     (nth coords 2)
+        rh     (nth coords 3)]
     (if aid-debugging?
       (set! (.-fillStyle ctx) (random-color)))
-    (.fillRect ctx x1 y1 x2 y2)))
+    (.fillRect ctx x1 y1 rw rh)))
 
 ;; public API:
 

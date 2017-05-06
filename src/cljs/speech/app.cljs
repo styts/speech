@@ -2,20 +2,25 @@
   (:require [chord.client :refer [ws-ch]]
             [clojure.core.async :refer [<!]]
             [reagent.core :as reagent]
-            [speech.canvas :refer [canvas-component push-raw-data]])
+            [speech.canvas :refer [canvas-component push-raw-data]]
+            [speech.spectrogram :refer [spectrogram-component add-data-to-spectrogram]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (enable-console-print!)
 
 (defn container []
   [:div
-   [canvas-component]])
+   [canvas-component]
+   [spectrogram-component]])
 
 (defn init []
   (reagent/render-component [container] (.getElementById js/document "container")))
 
 (defn- handle-message! [message]
-  (push-raw-data message))
+  (let [fft (:fft message)]
+    (if fft
+      (add-data-to-spectrogram fft)
+      (push-raw-data message))))
 
 (defn receive-msgs!
   "Every time we get a message from the server, add it to our list"

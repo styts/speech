@@ -4,6 +4,7 @@
    [com.stuartsierra.component :as component]
    (system.components [http-kit :refer [new-web-server]])
    [speech.web :refer [app]]
+   [speech.glue] ;; referring this starts the go loops
    [speech.microphone :refer [create-system]]
    [environ.core :refer [env]]))
 
