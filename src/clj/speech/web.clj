@@ -9,8 +9,8 @@
             [org.httpkit.server :refer [on-close send! with-channel]]
             [speech
              [microphone :refer [audio-channel averages-channel]]
-             [utils :refer [average split-by]]
-             ]))
+             [parameters :as parameters]
+             [utils :refer [average split-by]]]))
 
 (defonce channel-hub (atom {}))
 
@@ -44,14 +44,16 @@
 
   This is for browser performance reasons"
   [data]
-  (if (> (count @buffer) 50)
-    (do
-      (-> average
-          (map (split-by 15 @buffer))
-          generate-string
-          send-data-to-ws)
-      (reset! buffer []))
-    (swap! buffer conj data)))
+  (let [n-frames   (:send-after-frames parameters/ws-grouping)
+        groups-of (:groups-of parameters/ws-grouping)]
+    (if (> (count @buffer) n-frames)
+      (do
+        (-> average
+            (map (split-by groups-of @buffer))
+            generate-string
+            send-data-to-ws)
+        (reset! buffer []))
+      (swap! buffer conj data))))
 
 (defn ws-send
   "Shortcut for talking to the websocket connection"
@@ -61,8 +63,7 @@
 (go-loop []
   (-> averages-channel
       <!
-      add-data-to-buffer-and-maybe-send
-      )
+      add-data-to-buffer-and-maybe-send)
   (recur))
 
 (defroutes app

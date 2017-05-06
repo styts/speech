@@ -1,18 +1,21 @@
 (ns speech.canvas
   (:require clojure.core
-            [reagent.core :as reagent]))
+            [reagent.core :as reagent]
+            [speech.parameters :as parameters]))
 
 (enable-console-print!)
 
+(def params parameters/canvas)
+
 ;; data is stored here
-(def capacity 1000) ;; buffer capacity
+(def capacity (:capacity params)) ;; buffer capacity
 (def canvas-buffer (reagent/atom []))
 
 ;; canvas width and height, in px
 (def w 1000)
 (def h 100)
 
-(def max-volume 50) ;; used for calculating height of the rectangles to draw
+(def max-volume (:max-volume params)) ;; used for calculating height of the rectangles to draw
 
 (def aid-debugging? false) ;; enables random colors for data samples
 
