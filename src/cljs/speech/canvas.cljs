@@ -48,7 +48,9 @@
    {:reagent-render (fn [] [:canvas#canvas {:width w :height h}])
     :component-did-mount init}))
 
-(defn- rect-coords [index size]
+(defn- rect-coords
+  "Coordinates used by the ctx.fillRect function"
+  [index size]
   (let [r-width   (/ w capacity)
         r-height  (* size (/ h max-volume))
         x1        (* index r-width)

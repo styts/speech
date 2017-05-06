@@ -1,56 +1,42 @@
 (ns speech.app
   (:require [chord.client :refer [ws-ch]]
-            [clojure.core :refer [swap!]]
             [clojure.core.async :refer [<!]]
             [reagent.core :as reagent]
-            [speech.canvas :refer [canvas-component push-raw-data]]
-            #_[speech.graph :refer [chart-component update-chart]])
+            [speech.canvas :refer [canvas-component push-raw-data]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
-
-(def chart-size 200)
-(defonce buffer (reagent.ratom/atom (repeat chart-size 0)))
 
 (enable-console-print!)
 
 (defn container []
   [:div
-   #_[chart-component buffer]
    [canvas-component]])
 
 (defn init []
   (reagent/render-component [container] (.getElementById js/document "container")))
 
-(defn add-message [buffer message]
-  (take (count buffer) (conj buffer message)))
-
 (defn- handle-message! [message]
-  (push-raw-data message)
-  #_(if (:raw message)
-    ;; handle raw
-    (push-raw-data (:raw message))
+  (push-raw-data message))
 
-    ;; otherwise, draw on main chart
-    (doseq [m message] (swap! buffer add-message m))))
-
-(defn receive-msgs! [server-ch]
-  ;; every time we get a message from the server, add it to our list
+(defn receive-msgs!
+  "Every time we get a message from the server, add it to our list"
+  [server-ch]
   (go-loop []
     (let [{:keys [message error] :as msg} (<! server-ch)]
       (if error
         (js/console.error error)
-        (do
-          (handle-message! message)
-          #_(update-chart (reverse @buffer))))
+        (handle-message! message))
       (when msg
         (recur)))))
 
-(set!
- (.-onload js/window)
- (fn []
-   (go
-     (let [{:keys [ws-channel error]} (<! (ws-ch "ws://localhost:4000/ws" {:format :json-kw}))]
-       (js/console.log "connected to channel: " ws-channel)
-       (if error
-         (js/console.log "Couldn't connect to websocket: " error)
-         ;; register handler for listening to ws
-         (receive-msgs! ws-channel))))))
+(defn connect-to-ws!
+  "Connects to WS and registers message listener"
+  []
+  (go
+    (let [{:keys [ws-channel error]} (<! (ws-ch "ws://localhost:4000/ws" {:format :json-kw}))]
+      (js/console.log "connected to channel: " ws-channel)
+      (if error
+        (js/console.log "Couldn't connect to websocket: " error)
+        ;; register handler for listening to ws
+        (receive-msgs! ws-channel)))))
+
+(set! (.-onload js/window) connect-to-ws!)
