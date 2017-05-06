@@ -1,3 +1,4 @@
+#_(comment
 (ns speech.graph
   (:require [clojure.core :refer [swap!]]
             [reagent.core :as reagent]
@@ -26,3 +27,5 @@
      {:component-did-mount mount-chart
       :display-name        "chart-component"
       :reagent-render      (fn [] [:div {:class "ct-chart"}])}))
+
+)

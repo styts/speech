@@ -7,7 +7,6 @@
 (def audio-channel (chan (sliding-buffer 20)))
 (def averages-channel (chan (sliding-buffer 20)))
 
-;; main thread for getting new microphone data
 (defn start-capture []
   "captures some audio from the microphone and puts it into a buffer"
 
@@ -23,12 +22,12 @@
 
   ;; print format
   (println (.getFormat line))
-  (println "buffer size. desired:" buffer-size "real:" (.getBufferSize line))
+  (println "buffer size. desired:" buffer-size " line:" (.getBufferSize line))
 
   ;; return the line, stored in system. needs to be closed later
   {:line line
    :loop (go-loop []
-           (.read line buffer 0 buffer-size)
+           (.read line buffer 0 (count buffer))
            (put! audio-channel (map abs buffer))
            (put! averages-channel (-> buffer calculations :average))
            (recur))})

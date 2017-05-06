@@ -4,7 +4,7 @@
             [clojure.core.async :refer [<!]]
             [reagent.core :as reagent]
             [speech.canvas :refer [canvas-component push-raw-data]]
-            [speech.graph :refer [chart-component update-chart]])
+            #_[speech.graph :refer [chart-component update-chart]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (def chart-size 200)
@@ -14,7 +14,7 @@
 
 (defn container []
   [:div
-   [chart-component buffer]
+   #_[chart-component buffer]
    [canvas-component]])
 
 (defn init []
@@ -24,7 +24,8 @@
   (take (count buffer) (conj buffer message)))
 
 (defn- handle-message! [message]
-  (if (:raw message)
+  (push-raw-data message)
+  #_(if (:raw message)
     ;; handle raw
     (push-raw-data (:raw message))
 
@@ -39,7 +40,7 @@
         (js/console.error error)
         (do
           (handle-message! message)
-          (update-chart (reverse @buffer))))
+          #_(update-chart (reverse @buffer))))
       (when msg
         (recur)))))
 
