@@ -1,5 +1,5 @@
 (ns speech.user
-  (:require [clojure.core.async :refer [<!! close!]]
+  (:require [clojure.core.async :refer [<!! close! timeout]]
             [com.stuartsierra.component :as component]
             [speech
              [microphone :refer [audio-channel]]
@@ -7,16 +7,21 @@
              [web :refer [ws-send]]]
             [system.repl :refer [reset set-init! start stop system]]))
 
-(set-init! #'dev-system)
-
 (comment
-  (reset)
-
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; START SYSTEM:
+  (set-init! #'dev-system)
   (start)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (reset)
   (stop)
-  (ws-send {:fft [30 60 180 360 500 900 1400]})
-  (ws-send "test")
-  (ws-send {:frame (<!! audio-channel)})
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  ;; Experiments:
+  (let [t (timeout 1000)]
+    (<!! t)
+    (ws-send {:frame (<!! audio-channel)}))
+
 
   ;; stopping the go-blocks is not working yet
   (close! (:go-avg (:glue (:glue system))))

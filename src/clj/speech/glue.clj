@@ -28,7 +28,7 @@
                        :go-fft (go-fft)}))
   (stop [this]
     (let [{:keys [go-avg go-fft]} (:glue this)]
-      (prn this (keys this) (keys (:glue this)))
+      ;; (prn this (keys this) (keys (:glue this)))
       ;; Throws error
       ;; (close! go-avg)
       ;; (close! go-fft)

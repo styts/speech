@@ -5,33 +5,34 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def ^{:doc "Audio card needs to capture with this frequency"}
-  sampling-rate-hz 8000)
+  sampling-rate-hz 16000)
 
 (def ^{:doc "Frame size in milliseconds. Research shows it should be 10-20ms"}
   frame-size-ms 20)
 
-(def samples-per-frame (/ 1000 frame-size-ms)) ;; 50 samples at 20ms
+(def frames-per-second (/ 1000 frame-size-ms)) ;; 50 frames per second
 
-(def frames-per-second (/ 1000 samples-per-frame)) ;; 20 frames per second
+(def samples-per-frame (/ sampling-rate-hz frames-per-second)) ;; 320 samples at 20ms
+(def bytes-per-frame (* 2 samples-per-frame)) ;; two bytes per sample
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; for web server
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def ws-grouping {:send-after-frames 25 ;; high - less cpu, more delay
-                  :groups-of 5})
+(def ws-grouping {:send-after-frames 5 ;; high - less cpu, more delay
+                  :groups-of 3})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; for displaying
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def canvas {;; :show-seconds 5 ;; not implemented
-             :capacity 1000
+             :capacity 500
              :spectrogram-capacity 200
-             :max-volume 80})
+             :max-volume 1500})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; for fft
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def fft {:max-value 2000}) ;; arbitrary, values above won't be colored (used to build gradient)
+(def fft {:max-value 5000}) ;; arbitrary, values above won't be colored (used to build gradient)
 
-(def spectrogram {:width-px 1000 :height-px 40})
+(def spectrogram {:width-px 1000 :height-px 400})

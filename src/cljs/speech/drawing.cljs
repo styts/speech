@@ -14,7 +14,7 @@
 
 (defn get-color [val]
   ;; (js* "debugger")
-  (if (or (< val 0) (>= val (:max-value parameters/fft))) "#eee"
+  (if (or (< val 0) (>= val (:max-value parameters/fft))) "#fcc"
       @(col/as-css (nth gradient (int val)))))
 
 (defn clear-canvas! [id]

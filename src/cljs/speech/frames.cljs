@@ -1,5 +1,6 @@
 (ns speech.frames
-  (:require [clojure.core :refer [prn]]))
+  (:require [cljsjs.chartist]
+            [clojure.core :refer [prn]]))
 
 (enable-console-print!)
 
@@ -20,8 +21,9 @@
               (clj->js chart-options))))
 
 (defn draw-live-frame [frame]
-  (prn frame)
+  (js/console.log (count frame) frame)
   (let [cnt (.getElementById js/document "container")
         chart (.getElementById js/document "frame-chart")
         ]
     (mount-chart chart frame)))
+
