@@ -15,6 +15,8 @@
 (def samples-per-frame (/ sampling-rate-hz frames-per-second)) ;; 320 samples at 20ms
 (def bytes-per-frame (* 2 samples-per-frame)) ;; two bytes per sample
 
+(def fft-frequencies (map #(/ (* sampling-rate-hz %) samples-per-frame)
+                          (range samples-per-frame)))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; for web server
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -33,6 +35,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; for fft
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def fft {:max-value 5000}) ;; arbitrary, values above won't be colored (used to build gradient)
+(def fft {:max-value 5}) ;; arbitrary, values above won't be colored (used to build gradient)
 
 (def spectrogram {:width-px 1000 :height-px 400})

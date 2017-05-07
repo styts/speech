@@ -8,13 +8,18 @@
     (rand-nth colors)))
 
 
+;; http://dev.thi.ng/gradients/
+;; orange
 ;; (def cosines [[0.500 0.500 0.500] [0.500 0.500 0.500] [0.800 0.800 0.500] [0.000 0.200 0.500]]) ;; orange
-(def cosines [[0.500 0.500 0.500] [0.500 0.500 0.500] [0.500 0.500 0.500] [1.000 1.000 1.000]]) ;; b/w - boring
+;; blue - magenta - orange
+(def cosines [[0.938 0.328 0.718] [0.659 0.438 0.328] [0.388 0.388 0.296] [2.538 2.478 0.168]])
+;; b/w - boring
+;; (def cosines [[0.500 0.500 0.500] [0.500 0.500 0.500] [0.500 0.500 0.500] [1.000 1.000 1.000]])
 (def gradient (grad/cosine-gradient (:max-value parameters/fft) cosines))
 
 (defn get-color [val]
   ;; (js* "debugger")
-  (if (or (< val 0) (>= val (:max-value parameters/fft))) "#fcc"
+  (if (or (< val 0) (>= val (:max-value parameters/fft))) "#faa"
       @(col/as-css (nth gradient (int val)))))
 
 (defn clear-canvas! [id]

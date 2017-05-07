@@ -22,7 +22,14 @@
   (if (seq l)
     (cons (take c l) (split-by c (drop c l)))))
 
+(defn first-half [v]
+  (let [n (Math/floor (/ (count v) 2))]
+    (first (split-at n v))))
+
 (comment
+  (first-half [1 2 3 4])
+  (first-half [1 2 3 4 5])
+
   (map average (split-by 10 x))
   (average [0 0 0]))
 

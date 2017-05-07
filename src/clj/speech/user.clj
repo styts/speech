@@ -1,19 +1,12 @@
+
 (ns speech.user
-  (:require [cfft.core :refer [fft]]
-            [clojure.core.async :refer [<!! close! timeout]]
+  (:require [clojure.core.async :refer [close!]]
             [com.stuartsierra.component :as component]
             [speech
-             [fft :refer [prepare-fft]]
-             [microphone :refer [audio-channel]]
-             [systems :refer [dev-system]]
-             [web :refer [ws-send]]]
+             [fft :refer [clean-fft]]
+             [glue :refer [send-frame]]
+             [systems :refer [dev-system]]]
             [system.repl :refer [reset set-init! start stop system]]))
-
-(defn send-frame []
-  (let [t (timeout 500)]
-    (<!! t)
-    (let [data (<!! audio-channel)]
-      (ws-send {:frame data :power (map prepare-fft (fft data))}))))
 
 (comment
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -26,7 +19,8 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   ;; Experiments:
-  (send-frame)
+  (send-frame 200)
+  (clean-fft [1 2 34])
 
   ;; stopping the go-blocks is not working yet
   (close! (:go-avg (:glue (:glue system))))
