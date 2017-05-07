@@ -7,12 +7,20 @@
           :font-size   "16px"
           :line-height 1.5}]
 
-  [:.ct-chart
+  [:#frame-chart.ct-chart
    [:.ct-series-a
     [:.ct-line
      {:stroke "#ccf"
       :stroke-width "1px"}]
     [:.ct-area {:fill "#bbf"}]]]
+
+  [:#power-chart.ct-chart
+   [:.ct-series-a
+    [:.ct-line
+     {:stroke "#fcc"
+      :stroke-width "1px"}]
+    [:.ct-area {:fill "#fbb"}]]]
+
 
   [:canvas#canvas {;;:border "1px solid #eee"
                    :width "100%"}]

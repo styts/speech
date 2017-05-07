@@ -21,11 +21,13 @@
 
 (defn- handle-message! [message]
   (let [fft   (:fft message)
+        power (:power message)
         avg   (:avg message)
         frame (:frame message)]
     (if fft   (add-data-to-spectrogram fft))
+    (if power (draw-live-frame power "power-chart"))
     (if avg   (push-raw-data avg))
-    (if frame (draw-live-frame frame))))
+    (if frame (draw-live-frame frame "frame-chart"))))
 
 (defn receive-msgs!
   "Every time we get a message from the server, add it to our list"
