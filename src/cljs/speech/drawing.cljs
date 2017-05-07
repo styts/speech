@@ -7,8 +7,10 @@
   (let [colors ["red" "blue" "green" "cyan" "#ccc" "#aaa" "#999"]]
     (rand-nth colors)))
 
-(def gradient (grad/cosine-gradient
-               (:max-value parameters/fft) [[0.500 0.500 0.500] [0.500 0.500 0.500] [0.800 0.800 0.500] [0.000 0.200 0.500]]))
+
+;; (def cosines [[0.500 0.500 0.500] [0.500 0.500 0.500] [0.800 0.800 0.500] [0.000 0.200 0.500]]) ;; orange
+(def cosines [[0.500 0.500 0.500] [0.500 0.500 0.500] [0.500 0.500 0.500] [1.000 1.000 1.000]]) ;; b/w - boring
+(def gradient (grad/cosine-gradient (:max-value parameters/fft) cosines))
 
 (defn get-color [val]
   ;; (js* "debugger")

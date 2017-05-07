@@ -6,8 +6,8 @@
 (enable-console-print!)
 
 ;; width and height, in px
-(def w 1000)
-(def h 400)
+(def w (:width-px parameters/spectrogram))
+(def h (:height-px parameters/spectrogram))
 
 (def params parameters/canvas)
 

@@ -33,3 +33,5 @@
 ;; for fft
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def fft {:max-value 2000}) ;; arbitrary, values above won't be colored (used to build gradient)
+
+(def spectrogram {:width-px 1000 :height-px 40})
