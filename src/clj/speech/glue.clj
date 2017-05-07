@@ -29,8 +29,9 @@
   (stop [this]
     (let [{:keys [go-avg go-fft]} (:glue this)]
       (prn this (keys this) (keys (:glue this)))
-      (close! go-avg)
-      (close! go-fft)
+      ;; Throws error
+      ;; (close! go-avg)
+      ;; (close! go-fft)
       (dissoc this :glue)
       (prn "Stopped Glue go-loops")
       this)))

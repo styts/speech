@@ -38,6 +38,11 @@
   (doseq [channel (keys @channel-hub)]
     (send! channel data)))
 
+(defn ws-send
+  "Shortcut for talking to the websocket connection"
+  [data]
+  (send-data-to-ws (generate-string data)))
+
 (defn add-data-to-buffer-and-maybe-send
   "We don't want to send every message to the websocket,
   so we buffer the messages and send a list of them.
@@ -47,20 +52,14 @@
   (let [n-frames   (:send-after-frames parameters/ws-grouping)
         groups-of (:groups-of parameters/ws-grouping)]
     (if (> (count @buffer) n-frames)
-      (do
-        (-> average
-            (map (split-by groups-of @buffer))
-            generate-string
-            send-data-to-ws)
-        (reset! buffer []))
+      (do (as-> (map average (split-by groups-of @buffer)) v
+                (assoc {} :avg v)
+                (ws-send v))
+          (reset! buffer []))
       (swap! buffer conj data))))
-
-(defn ws-send
-  "Shortcut for talking to the websocket connection"
-  [data]
-  (send-data-to-ws (generate-string data)))
 
 (defroutes app
   (GET "/ws" [] ws-handler)
   (GET "/live" [] live-handler)
   (not-found "<h1>Page not found</h1>"))
+

@@ -16,7 +16,7 @@
   (stop)
   (ws-send {:fft [30 60 180 360 500 900 1400]})
   (ws-send "test")
-  (ws-send {:live (<!! audio-channel)})
+  (ws-send {:frame (<!! audio-channel)})
 
   ;; stopping the go-blocks is not working yet
   (close! (:go-avg (:glue (:glue system))))
