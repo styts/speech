@@ -36,10 +36,11 @@
                  [powerlaces/boot-cljs-devtools "0.2.0" :scope "test"]
                  [reagent "0.6.1"]
                  [weasel                    "0.7.0"      :scope "test"]
+                 [thi.ng/color "1.2.0"]
 
                  [cfft "0.1.0"]
-                 [thi.ng/color "1.2.0"]
-                 [net.mikera/vectorz-clj "0.46.0"]])
+                 [net.mikera/vectorz-clj "0.46.0"]
+                 [com.taoensso/tufte "1.1.1"]])
 
 (require
  '[environ.boot :refer [environ]]

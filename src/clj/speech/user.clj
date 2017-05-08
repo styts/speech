@@ -1,5 +1,6 @@
 (ns speech.user
-  (:require [clojure.core
+  (:require [cfft.core :refer [fft]]
+            [clojure.core
              [async :refer [<!! close!]]
              [matrix :refer [to-nested-vectors]]]
             [com.stuartsierra.component :as component]
@@ -10,7 +11,8 @@
              [systems :refer [dev-system]]
              [web :refer [ws-send]]
              [windowing :refer [hammer hamming-window]]]
-            [system.repl :refer [reset set-init! start stop system]]))
+            [system.repl :refer [reset set-init! start stop system]]
+            [taoensso.tufte :as tufte :refer [p profile]]))
 
 (defn- send-both []
   (let [d (<!! audio-channel)]
@@ -26,14 +28,22 @@
   (reset)
   (stop)
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-  ;; Experiments:
+  ;; Actions:
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; send frame after a delay in ms
   (send-frame 200)
   ;; display the hamming-window
   (ws-send {:power (to-nested-vectors hamming-window)})
   ;; send both the frame and power spectrum for charting
   (send-both)
 
+  ;; Profiling
+  (tufte/add-basic-println-handler! {})
+  (profile {} (dotimes [_ 5]
+                (p :fft (doall (fft (range 256))))))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Here be dragons...
   ;; stopping the go-blocks is not working yet
   (close! (:go-avg (:glue (:glue system))))
   (component/stop (:glue (:glue system)))

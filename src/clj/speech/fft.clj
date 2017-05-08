@@ -6,7 +6,8 @@
             [speech
              [microphone :refer [audio-channel]]
              [utils :refer [first-half]]
-             [windowing :refer [hammer]]]))
+             [windowing :refer [hammer]]]
+            [taoensso.tufte :refer [p]]))
 
 (defn prepare-fft
   "Prepare fft data: sqrt(x*x + y*y)" [x]
@@ -18,14 +19,14 @@
     b))
 
 (defn clean-fft [fft-data]
-  (map prepare-fft (first-half fft-data)))
+  (map (p :prep prepare-fft) (p :fst-hlf (first-half (doall fft-data)))))
 
 (defn get-fft
   "Read off the channel and pre-processes"
-  ([] (get-fft (<!! audio-channel)))
+  ([] (get-fft (p :take-audio (<!! audio-channel))))
   ([raw-data]
-   (let [hmrd (to-nested-vectors (hammer raw-data))
-         fft-data (fft hmrd)
-         a (clean-fft fft-data)]
+   (let [hmrd (p :tnv (to-nested-vectors (p :hammer (doall (hammer raw-data)))))
+         fft-data (p :fft (doall (p :fft-pre-doall (fft hmrd))))
+         a (p :cln (clean-fft fft-data))]
      a)))
 

@@ -29,7 +29,7 @@
   "Multiplies the data vector with the hamming window vector,
   thus applying the hammming window function (a hill from 0 to 1)"
   [data]
-  (assert (= (count data)
+  #_(assert (= (count data)
              (:n-bins parameters/fft))
           "data and hamming-window size mismatch")
-  (mul (array data) hamming-window))
+  (mul (array data) (take (count data) hamming-window)))
