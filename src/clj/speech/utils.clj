@@ -1,4 +1,5 @@
-(ns speech.utils)
+(ns speech.utils
+  (:import java.lang.Math))
 
 ;; helpers
 (defn abs [n] (max n (- n)))

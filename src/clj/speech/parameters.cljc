@@ -35,6 +35,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; for fft
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def fft {:max-value 5}) ;; arbitrary, values above won't be colored (used to build gradient)
+(def fft {:max-value 5
+          :n-bins 256}) ;; arbitrary, values above won't be colored (used to build gradient)
 
 (def spectrogram {:width-px 1000 :height-px 400})
