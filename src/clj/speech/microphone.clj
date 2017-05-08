@@ -9,7 +9,7 @@
 
 (def audio-channel (chan (sliding-buffer 1)))
 
-(def averages-channel (chan (sliding-buffer 20)))
+(def averages-channel (chan (sliding-buffer 1)))
 
 (def params {:sampleRate parameters/sampling-rate-hz
              :sampleSizeInBits 16

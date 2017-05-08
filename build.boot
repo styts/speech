@@ -38,7 +38,8 @@
                  [weasel                    "0.7.0"      :scope "test"]
 
                  [cfft "0.1.0"]
-                 [thi.ng/color "1.2.0"]])
+                 [thi.ng/color "1.2.0"]
+                 [net.mikera/vectorz-clj "0.46.0"]])
 
 (require
  '[environ.boot :refer [environ]]

@@ -1,14 +1,21 @@
-
 (ns speech.user
-  (:require [clojure.core.async :refer [close!]]
+  (:require [clojure.core
+             [async :refer [<!! close!]]
+             [matrix :refer [to-nested-vectors]]]
             [com.stuartsierra.component :as component]
             [speech
-             [fft :refer [clean-fft]]
+             [fft :refer [get-fft]]
              [glue :refer [send-frame]]
+             [microphone :refer [audio-channel]]
              [systems :refer [dev-system]]
              [web :refer [ws-send]]
-             [windowing :refer [hamming-window]]]
+             [windowing :refer [hammer hamming-window]]]
             [system.repl :refer [reset set-init! start stop system]]))
+
+(defn- send-both []
+  (let [d (<!! audio-channel)]
+    (ws-send {:power (get-fft d)
+              :frame (to-nested-vectors (hammer d))})))
 
 (comment
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -22,8 +29,10 @@
 
   ;; Experiments:
   (send-frame 200)
-  (clean-fft [1 2 34])
-  (ws-send {:power hamming-window})
+  ;; display the hamming-window
+  (ws-send {:power (to-nested-vectors hamming-window)})
+  ;; send both the frame and power spectrum for charting
+  (send-both)
 
   ;; stopping the go-blocks is not working yet
   (close! (:go-avg (:glue (:glue system))))

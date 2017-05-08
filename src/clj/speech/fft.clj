@@ -1,9 +1,12 @@
 (ns speech.fft
   (:require [cfft.core :refer [fft]]
-            [clojure.core.async :refer [<!!]]
+            [clojure.core
+             [async :refer [<!!]]
+             [matrix :refer [to-nested-vectors]]]
             [speech
              [microphone :refer [audio-channel]]
-             [utils :refer [first-half]]]))
+             [utils :refer [first-half]]
+             [windowing :refer [hammer]]]))
 
 (defn prepare-fft
   "Prepare fft data: sqrt(x*x + y*y)" [x]
@@ -15,12 +18,14 @@
     b))
 
 (defn clean-fft [fft-data]
-  (first-half (map prepare-fft fft-data)))
+  (map prepare-fft (first-half fft-data)))
 
 (defn get-fft
   "Read off the channel and pre-processes"
-  []
-  (let [ffts (fft (<!! audio-channel))
-        a (clean-fft ffts)]
-    a))
+  ([] (get-fft (<!! audio-channel)))
+  ([raw-data]
+   (let [hmrd (to-nested-vectors (hammer raw-data))
+         fft-data (fft hmrd)
+         a (clean-fft fft-data)]
+     a)))
 
