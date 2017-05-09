@@ -13,7 +13,7 @@
 
 ;; data is stored here
 (def capacity (:spectrogram-capacity params)) ;; buffer capacity
-(def spectrogram-buffer (reagent/atom []))
+(def spectrogram-counter (reagent/atom 0))
 
 (defn spectrogram-component []
   (reagent/create-class
@@ -28,14 +28,12 @@
                                (.translate ctx 0 h)
                                (.scale ctx 1 -1))))}))
 
-(defn add-to-buffer
-  "if it has reached capacity, then clear canvas and return [message]
-  otherwise (take n)"
-  [b message]
-  (let [has-reached-capacity? (>= (count b) capacity)]
+(defn handle-counter
+  [n-drawn message]
+  (let [has-reached-capacity? (>= n-drawn capacity)]
     (if has-reached-capacity?
-      (do (clear-canvas! "spectrogram") [message])
-      (take capacity (conj b message)))))
+      (do (clear-canvas! "spectrogram") 0)
+      (inc n-drawn))))
 
 (defn draw-rect [ctx x-idx y-idx value data-size]
   (let [rw (/ w capacity)
@@ -49,15 +47,16 @@
 (defn draw-spectrogram [new-data]
   (let [canvas (.getElementById js/document "spectrogram")
         ctx    (.getContext canvas "2d")
-        idx    (- (count @spectrogram-buffer) 1)]
+        idx    (dec @spectrogram-counter)]
     (doseq [[i value] (map-indexed vector new-data)]
       (draw-rect ctx idx i value (count new-data)))))
 
 ;; public API:
 
 (defn add-data-to-spectrogram
-  "Save the message in the canvas buffer.
+  "Increment counter,
   Draw the last message on the canvas"
   [data]
-  (swap! spectrogram-buffer add-to-buffer data)
-  (draw-spectrogram data))
+  (doseq [d data]
+    (swap! spectrogram-counter handle-counter d)
+    (draw-spectrogram d)))
