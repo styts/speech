@@ -1,9 +1,7 @@
 (ns speech.windowing
   (:require [clojure.core
-             [async :as a :refer [<! <!! chan go put!]]
-             [matrix :refer [array mul set-current-implementation]]]
-            [speech
-             [parameters :as parameters]]))
+             [async :as a :refer [<! chan go put!]]
+             [matrix :refer [array mul set-current-implementation to-nested-vectors]]]))
 
 (set-current-implementation :vectorz)
 
@@ -26,17 +24,15 @@
   [N]
   (map #(hamming-window-fn N %) (range N)))
 
-(def hamming-window (array (build-hamming-window (:n-bins parameters/fft))))
+;; (def hamming-window (array (build-hamming-window (:n-bins parameters/fft))))
 
 (defn hammer
   "Multiplies the data vector with the hamming window vector,
   thus applying the hammming window function (a hill from 0 to 1)"
   [data]
-  #_(assert (= (count data)
-               (:n-bins parameters/fft))
-            "data and hamming-window size mismatch")
-  (mul (array data) (take (count data) hamming-window)))
-
+  (to-nested-vectors
+   (mul (array data)
+        (array (build-hamming-window (count data))))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn splitter
@@ -71,5 +67,4 @@
   (splitter foo-channel buffered-channel 2)
   (put! foo-channel (range 4))
 
-  (splitter audio-channel buffered-channel 2)
-  )
+  (splitter audio-channel buffered-channel 2))

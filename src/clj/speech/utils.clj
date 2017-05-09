@@ -1,12 +1,7 @@
 (ns speech.utils
-  (:require [clojure.core
-             [async :as a :refer [<! <!! go-loop]]
-             [matrix :refer [to-nested-vectors]]]
+  (:require [clojure.core.async :as a :refer [<! <!! go-loop]]
             [speech
-             [fft :refer [get-fft]]
-             [web :refer [ws-send]]
-             [windowing :refer [hammer]]])
-  (:import java.lang.Math))
+             [fft :refer [j-fft prepare-fft]]]))
 
 ;; helpers
 (defn abs [n] (max n (- n)))

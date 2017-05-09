@@ -13,7 +13,6 @@
 
 (defn container []
   [:div
-   [canvas-component]
    [spectrogram-component]])
 
 (defn init []
@@ -21,13 +20,16 @@
 
 (defn- handle-message! [message]
   (let [fft   (:fft message)
+        ffts  (:ffts message)
         power (:power message)
+        green (:green message)
         avg   (:avg message)
         frame (:frame message)]
     (if fft   (add-data-to-spectrogram fft))
-    (if power (draw-live-frame power "power-chart"))
     (if avg   (push-raw-data avg))
-    (if frame (draw-live-frame frame "frame-chart"))))
+    (if power (draw-live-frame power "power-chart"))
+    (if frame (draw-live-frame frame "frame-chart"))
+    (if green (draw-live-frame green "green-chart"))))
 
 (defn receive-msgs!
   "Every time we get a message from the server, add it to our list"

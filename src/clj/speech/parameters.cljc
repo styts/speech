@@ -7,12 +7,12 @@
 (def ^{:doc "Audio card needs to capture with this frequency"}
   sampling-rate-hz 16000)
 
+(def samples-per-frame 256) ;; power of 2, for sake of FFT
+
+(def frames-per-second (float (/ sampling-rate-hz samples-per-frame))) ;; 62.5 frames per second
+
 (def ^{:doc "Frame size in milliseconds. Research shows it should be 10-20ms"}
-  frame-size-ms 20)
-
-
-(def samples-per-frame 256) ;; 256 is power of 2 - best for FFT, Xms per frame
-(def frames-per-second (/ sampling-rate-hz samples-per-frame)) ;; 62.5 frames per second
+  frame-size-ms (float (/ 1000 frames-per-second)))
 
 (def bytes-per-frame (* 2 samples-per-frame)) ;; two bytes per sample
 
@@ -30,13 +30,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def canvas {;; :show-seconds 5 ;; not implemented
              :capacity 500
-             :spectrogram-capacity 500
+             :spectrogram-capacity 1500
              :max-volume 1500})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; for fft
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def fft {:max-value 5  ;; arbitrary, values above won't be colored (used to build gradient)
-          :n-bins samples-per-frame ;; TODO make 256
+          :n-bins samples-per-frame
           })
 (def spectrogram {:width-px 1000 :height-px 400})
+
+(println "samples-per-frame:" samples-per-frame)
+(println "frame-size-ms:" frame-size-ms)
+(println "frames-per-second:" frames-per-second)

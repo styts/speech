@@ -21,9 +21,14 @@
       :stroke-width "1px"}]
     [:.ct-area {:fill "#fbb"}]]]
 
+  [:#green-chart.ct-chart
+   [:.ct-series-a
+    [:.ct-line
+     {:stroke "#cfc"
+      :stroke-width "1px"}]
+    [:.ct-area {:fill "#bfb"}]]]
 
-  [:canvas#canvas {;;:border "1px solid #eee"
-                   :width "100%"}]
-  [:canvas#spectrogram {:border "1px solid #eee"
-                   :width "100%"}]
+
+  [:canvas#canvas {:width "100%"}]
+  [:canvas#spectrogram {:width "100%"}]
   )

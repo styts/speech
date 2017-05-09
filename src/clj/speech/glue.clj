@@ -1,6 +1,6 @@
 (ns speech.glue
   (:require [clojure.core :refer [prn]]
-            [clojure.core.async :refer [chan go-loop <!]]
+            [clojure.core.async :refer [<! <!! chan go go-loop]]
             [com.stuartsierra.component :as component]
             [speech
              [fft :refer [get-fft]]
@@ -12,32 +12,32 @@
 (def window-channel (chan))
 
 #_(defn go-averages []
-  (go-loop []
-    (-> averages-channel
-        <!
-        add-data-to-buffer-and-maybe-send)
-    (recur)))
+    (go-loop []
+      (-> averages-channel
+          <!
+          add-data-to-buffer-and-maybe-send)
+      (recur)))
 ;; (def pi (double (/ 22 7)))
 ;; (with-precision 3 (double (/ 22 7)))
 (defn go-fft! []
   (go-loop []
-    (let [x (get-fft (<! window-channel))]
-      (when x
-        (ws-send {:fft (map float x)})
-        (recur)))))
+    (let [a (get-fft (<! window-channel))
+          b (get-fft (<! window-channel))
+          c (get-fft (<! window-channel))
+          d (get-fft (<! window-channel))]
+      (ws-send {:fft [(map float a)
+                      (map float b)
+                      (map float c)
+                      (map float d)]})
+      (recur))))
+
+#_(go
+    (let [capture (dotimes [_ 3] (<!! window-channel))]
+      capture))
 
 (defn go-window! []
   (splitter audio-channel window-channel 2))
 
-#_(defn send-frame
-  ([] (send-frame 500))
-  ([timeout-ms]
-   (let [t (timeout timeout-ms)]
-     (<!! t)
-     (let [data (<!! audio-channel)
-           fftd (j-fft data)
-           p    (clean-fft fftd)]
-       (ws-send {:frame data :power p})))))
 
 ;; This component starts the go loops that read/write from/to the data channels
 (defrecord Glue []
@@ -50,10 +50,6 @@
   (stop [this]
     (let [{:keys [go-avg go-fft]} (:glue this)]
       ;; TODO make go loops stoppable
-      ;; (prn this (keys this) (keys (:glue this)))
-      ;; Throws error
-      ;; (close! go-avg)
-      ;; (close! go-fft)
       (dissoc this :glue)
       (prn "Stopped Glue go-loops")
       this)))

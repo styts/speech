@@ -4,14 +4,13 @@
 
 (enable-console-print!)
 
-(def chart-options {:height "250px"
+(def chart-options {:height "200px"
                     :fullWidth true
                     :showArea true
                     :showPoint false
                     :lineSmooth false
                     :axisX {:showGrid false}
                     :axisY {:showGrid false}
-                    ;; :low 0
                     })
 
 (defn mount-chart [element data]
@@ -21,7 +20,6 @@
               (clj->js chart-options))))
 
 (defn draw-live-frame [frame element-id]
-  (js/console.log element-id (count frame) frame)
   (let [chart (.getElementById js/document element-id)]
     (mount-chart chart frame)))
 

@@ -17,16 +17,15 @@
     (vec target)))
 
 (defn prepare-fft
-  "Prepare fft data: sqrt(x*x + y*y)" [x]
-  (let [m (* x x)
-        r (Math/sqrt m)
+  "Prepare fft data" [x]
+  (let [r (Math/abs x)
         b (Math/log10 r)]
     b))
 
 (defn get-fft
   "Read off the channel and pre-processes"
   ([raw-data]
-   (let [hmrd (to-nested-vectors (hammer raw-data))
+   (let [hmrd (hammer raw-data)
          fft-data (j-fft hmrd)
          a (map prepare-fft fft-data)]
      a)))
