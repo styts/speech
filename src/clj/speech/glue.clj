@@ -1,6 +1,6 @@
 (ns speech.glue
   (:require [clojure.core :refer [prn]]
-            [clojure.core.async :refer [<! <!! chan go go-loop]]
+            [clojure.core.async :refer [>!! alts!! chan sliding-buffer thread]]
             [com.stuartsierra.component :as component]
             [speech
              [fft :refer [get-fft]]
@@ -9,7 +9,7 @@
              [windowing :refer [splitter]]]
             [system.repl :refer [start stop]]))
 
-(def window-channel (chan))
+(def window-channel (chan (sliding-buffer 1)))
 
 #_(defn go-averages []
     (go-loop []
@@ -19,7 +19,7 @@
       (recur)))
 ;; (def pi (double (/ 22 7)))
 ;; (with-precision 3 (double (/ 22 7)))
-(defn go-fft! []
+#_(defn go-fft! []
   (go-loop []
     (let [a (get-fft (<! window-channel))
           b (get-fft (<! window-channel))
@@ -38,20 +38,41 @@
 (defn go-window! []
   (splitter audio-channel window-channel 2))
 
+(defn start-processor [input-ch terminate-ch process-input]
+  (thread
+    (loop []
+      (let [[v ch] (alts!! [input-ch terminate-ch])]
+        (if (identical? ch input-ch)
+          (if (some? v)
+            (do (process-input v)
+                (recur)))
+          (prn "channel terminated"))))))
 
-;; This component starts the go loops that read/write from/to the data channels
+(defn fft-handler [windowed-data]
+  (let [a (get-fft windowed-data)]
+    (ws-send {:fft [(map float a)]})))
+
+(defn process-wrapper! [in-channel handler]
+  (let [terminator (chan)]
+    (start-processor in-channel terminator handler)
+    terminator))
+
+(defn stop-process! [terminator-ch]
+  (>!! terminator-ch :finish))
+
+;; This component starts the loops that read/write from/to the data channels
 (defrecord Glue []
   component/Lifecycle
   (start [this]
-    (prn "Started Glue go-loops")
-    (assoc this :glue {;:go-avg (go-averages)
-                       :go-window (go-window!)
-                       :go-fft (go-fft!)}))
+    (prn "Started Glue component")
+    (assoc this :glue
+           {:raw-to-window (go-window!)
+            :fft-to-ws (process-wrapper! window-channel fft-handler)}))
   (stop [this]
-    (let [{:keys [go-avg go-fft]} (:glue this)]
-      ;; TODO make go loops stoppable
+    (let [{:keys [raw-to-window fft-to-ws]} (:glue this)]
+      (stop-process! fft-to-ws)
       (dissoc this :glue)
-      (prn "Stopped Glue go-loops")
+      (prn "Stopped Glue component")
       this)))
 
 (defn create-glue []

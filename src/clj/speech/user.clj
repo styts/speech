@@ -1,5 +1,5 @@
 (ns speech.user
-  (:require [clojure.core.async :as a :refer [<!! close! timeout]]
+  (:require [clojure.core.async :as a :refer [<!! alts!! chan close! put! thread]]
             [com.stuartsierra.component :as component]
             [speech
              [fft :refer [j-fft prepare-fft]]
@@ -52,7 +52,8 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Here be dragons...
   ;; stopping the go-blocks is not working yet
-  (close! (:go-avg (:glue (:glue system))))
-  (component/stop (:glue (:glue system)))
-  (component/stop (:microphone system)))
+  (component/stop (:glue system))
+  (component/start (:glue system))
+
+)
 
