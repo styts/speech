@@ -3,10 +3,7 @@
              [async :refer [<!!]]
              [matrix :refer [to-nested-vectors]]]
             [speech
-             [microphone :refer [audio-channel]]
-             [utils :refer [first-half]]
-             [windowing :refer [hammer]]]
-            [taoensso.tufte :refer [p]])
+             [windowing :refer [hammer]]])
   (:import org.jtransforms.fft.DoubleFFT_1D))
 
 (defn j-fft
@@ -28,7 +25,6 @@
 
 (defn get-fft
   "Read off the channel and pre-processes"
-  ([] (get-fft (<!! audio-channel)))
   ([raw-data]
    (let [hmrd (to-nested-vectors (hammer raw-data))
          fft-data (j-fft hmrd)

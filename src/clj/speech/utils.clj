@@ -1,4 +1,11 @@
 (ns speech.utils
+  (:require [clojure.core
+             [async :as a :refer [<! <!! go-loop]]
+             [matrix :refer [to-nested-vectors]]]
+            [speech
+             [fft :refer [get-fft]]
+             [web :refer [ws-send]]
+             [windowing :refer [hammer]]])
   (:import java.lang.Math))
 
 ;; helpers
@@ -23,26 +30,14 @@
   (if (seq l)
     (cons (take c l) (split-by c (drop c l)))))
 
-(defn first-half [v]
-  (let [n (Math/floor (/ (count v) 2))]
-    (first (split-at n v))))
-
 (comment
-  (first-half [1 2 3 4])
-  (first-half [1 2 3 4 5])
-
   (map average (split-by 10 x))
   (average [0 0 0]))
 
-(defn bytes-to-int
-  ([bytes]
-   (bytes-to-int bytes 0))
-  ([bytes offset]
-   (reduce + 0
-           (map (fn [i]
-                  (let [shift (* (- 4 1 i)
-                                 8)]
-                    (bit-shift-left (bit-and (nth bytes (+ i offset))
-                                             0x000000FF)
-                                    shift)))
-                (range 0 4)))))
+(defn debug-channel
+  "Prints what the channel receives"
+  [label channel]
+  (go-loop []
+    (let [x (<! channel)]
+      (println label x)
+      (recur))))

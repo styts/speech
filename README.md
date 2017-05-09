@@ -6,7 +6,7 @@ An app that can currently visualize live audio data from the microphone, but asp
 * [x] capture live microphone data
 * [x] display live audio data as graph the browser
 * [x] display live spectrogram (it's not as good as I'd like)
-* [ ] signal windowing before spectrogram
+* [x] signal windowing before spectrogram
 * [ ] find ways to normalize fft results
 * [ ] train neural network to detect presence of speech in audio samples
 * [ ] send identified speech sample to Google for recognition

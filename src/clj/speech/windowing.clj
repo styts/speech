@@ -1,6 +1,9 @@
 (ns speech.windowing
-  (:require [clojure.core.matrix :refer [array mul set-current-implementation]]
-            [speech.parameters :as parameters]))
+  (:require [clojure.core
+             [async :as a :refer [<! <!! chan go put!]]
+             [matrix :refer [array mul set-current-implementation]]]
+            [speech
+             [parameters :as parameters]]))
 
 (set-current-implementation :vectorz)
 
@@ -30,6 +33,43 @@
   thus applying the hammming window function (a hill from 0 to 1)"
   [data]
   #_(assert (= (count data)
-             (:n-bins parameters/fft))
-          "data and hamming-window size mismatch")
+               (:n-bins parameters/fft))
+            "data and hamming-window size mismatch")
   (mul (array data) (take (count data) hamming-window)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn splitter
+  "Only tested with fraction == 2
+  TODO write description and add tests"
+  [input-channel output-channel fraction]
+  (let [state (atom [])]
+    (go (while true
+          (let [audio-data (<! input-channel)
+                size (/ (count audio-data) fraction)
+                a (take size audio-data)  ; first half A
+                b (drop size audio-data)] ; second half B
+            ;; (println "audio:" (take 10 audio-data)) ; debugging
+            (put! output-channel audio-data) ;; pass the whole thing
+            ;; (println "state has:" @state) ; debugging
+            (if (= (count @state) (- fraction 1)) ; if we saved an item
+              (do
+                ;; combine B and A - and send them out
+                (swap! state conj a)
+                (assert (= fraction (count @state))
+                        (str "expects" fraction "elements"))
+                (put! output-channel (flatten @state))
+                (reset! state [])))
+            (swap! state conj b))))))
+
+(comment
+  (def buffered-channel (chan))
+  (debug-channel "buffered channel:" buffered-channel)
+
+  (def foo-channel (chan))
+
+  (splitter foo-channel buffered-channel 2)
+  (put! foo-channel (range 4))
+
+  (splitter audio-channel buffered-channel 2)
+  )

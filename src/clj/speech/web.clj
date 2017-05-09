@@ -8,9 +8,10 @@
              [route :refer [not-found]]]
             [org.httpkit.server :refer [on-close send! with-channel]]
             [speech
-             [microphone :refer [audio-channel]]
+             ;; [microphone :refer [audio-channel]]
              [parameters :as parameters]
-             [utils :refer [average split-by]]]))
+             ;; [utils :refer [average split-by]]
+             ]))
 
 (defonce channel-hub (atom {}))
 
@@ -23,7 +24,7 @@
     (swap! channel-hub assoc channel req)
     (on-close channel (fn [status] (info "ws channel closed")))))
 
-(defn live-handler [request]
+#_(defn live-handler [request]
   (with-channel request channel
     (info "live channel opened" channel)
     (on-close channel (fn [status] (println "live channel closed" status)))
@@ -43,7 +44,7 @@
   [data]
   (send-data-to-ws (generate-string data)))
 
-(defn add-data-to-buffer-and-maybe-send
+#_(defn add-data-to-buffer-and-maybe-send
   "We don't want to send every message to the websocket,
   so we buffer the messages and send a list of them.
 
@@ -60,6 +61,6 @@
 
 (defroutes app
   (GET "/ws" [] ws-handler)
-  (GET "/live" [] live-handler)
+  ;; (GET "/live" [] live-handler)
   (not-found "<h1>Page not found</h1>"))
 

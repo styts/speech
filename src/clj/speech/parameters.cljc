@@ -10,9 +10,10 @@
 (def ^{:doc "Frame size in milliseconds. Research shows it should be 10-20ms"}
   frame-size-ms 20)
 
-(def frames-per-second (/ 1000 frame-size-ms)) ;; 50 frames per second
 
-(def samples-per-frame (/ sampling-rate-hz frames-per-second)) ;; 320 samples at 20ms
+(def samples-per-frame 256) ;; 256 is power of 2 - best for FFT, Xms per frame
+(def frames-per-second (/ sampling-rate-hz samples-per-frame)) ;; 62.5 frames per second
+
 (def bytes-per-frame (* 2 samples-per-frame)) ;; two bytes per sample
 
 (def fft-frequencies (map #(/ (* sampling-rate-hz %) samples-per-frame)
@@ -29,7 +30,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def canvas {;; :show-seconds 5 ;; not implemented
              :capacity 500
-             :spectrogram-capacity 1000
+             :spectrogram-capacity 500
              :max-volume 1500})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
