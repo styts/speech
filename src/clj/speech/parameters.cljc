@@ -29,7 +29,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def canvas {;; :show-seconds 5 ;; not implemented
              :capacity 500
-             :spectrogram-capacity 200
+             :spectrogram-capacity 1000
              :max-volume 1500})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

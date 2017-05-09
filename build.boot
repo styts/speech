@@ -9,11 +9,12 @@
                  [boot-environ "1.1.0"]
                  [org.danielsz/system "0.4.0"]
 
-                 ;; reply things
+                 ;; reply things, dev tools
                  [cider/cider-nrepl "0.15.0-snapshot"]
                  [refactor-nrepl "2.2.0"]
+                 [com.taoensso/tufte "1.1.1"]
 
-                 ;; backend
+                 ;; web backend
                  [compojure "1.3.4"] ;; defroutes
                  [jarohen/chord "0.6.0"] ;; websockets
 
@@ -38,9 +39,10 @@
                  [weasel                    "0.7.0"      :scope "test"]
                  [thi.ng/color "1.2.0"]
 
-                 [cfft "0.1.0"]
+                 ;; algorithms
                  [net.mikera/vectorz-clj "0.46.0"]
-                 [com.taoensso/tufte "1.1.1"]])
+                 [com.github.wendykierp/JTransforms "3.1"]
+                 ])
 
 (require
  '[environ.boot :refer [environ]]

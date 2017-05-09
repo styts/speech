@@ -5,8 +5,7 @@
              [matrix :refer [to-nested-vectors]]]
             [com.stuartsierra.component :as component]
             [speech
-             [fft :refer [get-fft]]
-             [glue :refer [send-frame]]
+             [fft :refer [get-fft j-fft]]
              [microphone :refer [audio-channel]]
              [systems :refer [dev-system]]
              [web :refer [ws-send]]
@@ -30,17 +29,15 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Actions:
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; send frame after a delay in ms
-  (send-frame 200)
   ;; display the hamming-window
   (ws-send {:power (to-nested-vectors hamming-window)})
   ;; send both the frame and power spectrum for charting
   (send-both)
 
   ;; Profiling
-  (tufte/add-basic-println-handler! {})
+  (tufte/add-basic-println-handler! {}) ;; enable printing to stdout
   (profile {} (dotimes [_ 5]
-                (p :fft (doall (fft (range 256))))))
+                (p :jfft (doall (j-fft (range 256))))))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Here be dragons...

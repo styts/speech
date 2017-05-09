@@ -1,11 +1,10 @@
 (ns speech.glue
-  (:require [cfft.core :refer [fft]]
-            [clojure.core :refer [prn]]
-            [clojure.core.async :refer [<! <!! go-loop timeout]]
+  (:require [clojure.core :refer [prn]]
+            [clojure.core.async :refer [<! go-loop]]
             [com.stuartsierra.component :as component]
             [speech
-             [fft :refer [clean-fft get-fft]]
-             [microphone :refer [audio-channel averages-channel]]
+             [fft :refer [get-fft]]
+             [microphone :refer [averages-channel]]
              [web :refer [add-data-to-buffer-and-maybe-send ws-send]]]
             [system.repl :refer [start stop]]))
 
@@ -18,16 +17,18 @@
 
 (defn go-fft []
   (go-loop []
-    (ws-send {:fft (get-fft)})
-    (recur)))
+    (let [x (get-fft)]
+      (when x
+        (ws-send {:fft x})
+        (recur)))))
 
-(defn send-frame
+#_(defn send-frame
   ([] (send-frame 500))
   ([timeout-ms]
    (let [t (timeout timeout-ms)]
      (<!! t)
      (let [data (<!! audio-channel)
-           fftd (fft data)
+           fftd (j-fft data)
            p    (clean-fft fftd)]
        (ws-send {:frame data :power p})))))
 
@@ -36,7 +37,7 @@
   component/Lifecycle
   (start [this]
     (prn "Started Glue go-loops")
-    (assoc this :glue {:go-avg (go-averages)
+    (assoc this :glue {;:go-avg (go-averages)
                        :go-fft (go-fft)}))
   (stop [this]
     (let [{:keys [go-avg go-fft]} (:glue this)]

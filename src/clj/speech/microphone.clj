@@ -1,13 +1,13 @@
 (ns speech.microphone
   (:require [clojure.core :refer [prn]]
-            [clojure.core.async :refer [chan close! go-loop put! sliding-buffer]]
+            [clojure.core.async :refer [chan >! close! go-loop put! sliding-buffer]]
             [com.stuartsierra.component :as component]
             [speech
              [parameters :as parameters]
              [utils :refer [calculations]]])
   (:import [java.nio ByteBuffer ByteOrder]))
 
-(def audio-channel (chan (sliding-buffer 1)))
+(def audio-channel (chan))
 
 (def averages-channel (chan (sliding-buffer 1)))
 
@@ -49,8 +49,8 @@
   {:line line
    :loop (go-loop []
            (.read line buffer 0 (count buffer))
-           (put! audio-channel (process-buffer! buffer))
-           (put! averages-channel (-> s-array calculations :average)) ;; FIXME not using the bytes-to-int function as above
+           (>! audio-channel (process-buffer! buffer))
+           ;; (put! averages-channel (-> s-array calculations :average)) ;; FIXME not using the bytes-to-int function as above
            (recur))})
 
 (defrecord Capture []
