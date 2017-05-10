@@ -14,13 +14,6 @@
       :stroke-width "1px"}]
     [:.ct-area {:fill "#bbf"}]]]
 
-  [:#power-chart.ct-chart
-   [:.ct-series-a
-    [:.ct-line
-     {:stroke "#fcc"
-      :stroke-width "1px"}]
-    [:.ct-area {:fill "#fbb"}]]]
-
   [:#green-chart.ct-chart
    [:.ct-series-a
     [:.ct-line
@@ -28,6 +21,12 @@
       :stroke-width "1px"}]
     [:.ct-area {:fill "#bfb"}]]]
 
+  [:#power-chart.ct-chart
+   [:.ct-series-a
+    [:.ct-bar
+     {:stroke "#fbb"
+      :stroke-width "1px"}]
+    [:.ct-area {:fill "#fbb"}]]]
 
   [:canvas#canvas {:width "100%"}]
   [:canvas#spectrogram {:width "100%"}]

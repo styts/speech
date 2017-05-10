@@ -10,16 +10,16 @@
                     :showPoint false
                     :lineSmooth false
                     :axisX {:showGrid false}
-                    :axisY {:showGrid false}
-                    })
+                    :axisY {:showGrid false}})
 
-(defn mount-chart [element data]
-  (def chart (js/Chartist.Line.
-              element
-              (clj->js {:series [data]})
-              (clj->js chart-options))))
+(defn mount-chart [element data & type]
+  (let [cls (if (= (first (first type)) :bar) js/Chartist.Bar js/Chartist.Line)]
+    (new cls
+         element
+         (clj->js {:series [data]})
+         (clj->js chart-options))))
 
-(defn draw-live-frame [frame element-id]
+(defn draw-live-frame [frame element-id & type]
   (let [chart (.getElementById js/document element-id)]
-    (mount-chart chart frame)))
+    (mount-chart chart frame type)))
 

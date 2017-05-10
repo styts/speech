@@ -27,7 +27,7 @@
         frame (:frame message)]
     (if fft   (add-data-to-spectrogram fft))
     (if avg   (push-raw-data avg))
-    (if power (draw-live-frame power "power-chart"))
+    (if power (draw-live-frame power "power-chart" :bar))
     (if frame (draw-live-frame frame "frame-chart"))
     (if green (draw-live-frame green "green-chart"))))
 
