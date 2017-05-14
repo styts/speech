@@ -15,6 +15,7 @@
         b (<!! window-channel)]
     (ws-send {:power b
               :frame a})))
+
 (defn snd
   "Display charts for debugging"
   ([]  (snd (<!! window-channel)))
@@ -54,6 +55,5 @@
   ;; stopping the go-blocks is not working yet
   (component/stop (:glue system))
   (component/start (:glue system))
-
 )
 

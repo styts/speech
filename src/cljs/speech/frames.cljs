@@ -4,7 +4,7 @@
 
 (enable-console-print!)
 
-(def chart-options {:height "200px"
+(def chart-options {:height "160px"
                     :fullWidth true
                     :showArea true
                     :showPoint false

@@ -1,11 +1,15 @@
 (ns speech.styles
-  (:require [garden.def :refer [defrule defstyles]]
-            [garden.stylesheet :refer [rule]]))
+  (:require [garden.def :refer [defstyles]]))
 
 (defstyles screen
   [:body {:font-family "Helvetica Neue"
           :font-size   "16px"
           :line-height 1.5}]
+
+  [:h1 {:font-size "16px"
+        :font-weight "normal"
+        :margin "0px"
+        :color "#ddd"}]
 
   [:#frame-chart.ct-chart
    [:.ct-series-a
@@ -29,5 +33,4 @@
     [:.ct-area {:fill "#fbb"}]]]
 
   [:canvas#canvas {:width "100%"}]
-  [:canvas#spectrogram {:width "100%"}]
-  )
+  [:canvas#spectrogram {:width "100%"}])
