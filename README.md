@@ -1,6 +1,7 @@
 # Speech
 
 An app that can currently visualize live audio data from the microphone, but aspires to be more one day.
+![](resources/demo.gif)
 
 ## Roadmap
 * [x] capture live microphone data
