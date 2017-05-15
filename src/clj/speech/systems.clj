@@ -13,3 +13,9 @@
    :microphone (create-system)
    :glue (create-glue)
    ])
+
+(defsystem prod-system
+  [:web (new-web-server (Integer. (env :http-port "4000")) app)
+   :microphone (create-system)
+   :glue (create-glue)
+   ])

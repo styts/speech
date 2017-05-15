@@ -22,8 +22,13 @@
         b (Math/log10 r)]
     b))
 
-(defn get-fft
-  "Read off the channel and pre-processes"
+(defn process-fft
+  "Pre-processes data:
+
+  given raw data,
+  apply hamming window
+  apply fft
+  apply abs and log10"
   ([raw-data]
    (let [hmrd (hammer raw-data)
          fft-data (j-fft hmrd)

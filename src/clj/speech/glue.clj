@@ -3,7 +3,7 @@
             [clojure.core.async :refer [>!! alts!! chan sliding-buffer thread]]
             [com.stuartsierra.component :as component]
             [speech
-             [fft :refer [get-fft]]
+             [fft :refer [process-fft]]
              [microphone :refer [audio-channel]]
              [web :refer [ws-send]]
              [windowing :refer [splitter]]]
@@ -11,33 +11,16 @@
 
 (def window-channel (chan (sliding-buffer 1)))
 
-#_(defn go-averages []
-    (go-loop []
-      (-> averages-channel
-          <!
-          add-data-to-buffer-and-maybe-send)
-      (recur)))
-;; (def pi (double (/ 22 7)))
-;; (with-precision 3 (double (/ 22 7)))
-#_(defn go-fft! []
-  (go-loop []
-    (let [a (get-fft (<! window-channel))
-          b (get-fft (<! window-channel))
-          c (get-fft (<! window-channel))
-          d (get-fft (<! window-channel))]
-      (ws-send {:fft [(map float a)
-                      (map float b)
-                      (map float c)
-                      (map float d)]})
-      (recur))))
-
-#_(go
-    (let [capture (dotimes [_ 3] (<!! window-channel))]
-      capture))
-
 (defn go-window! []
   (splitter audio-channel window-channel 2))
 
+(defn fft-handler [windowed-data]
+  (let [a (process-fft windowed-data)]
+    (ws-send {:fft [(map float a)]})))
+
+;; These three constructs make it possible to start a process that listens to a
+;; channel and calls a handler function. In addition, this process can be
+;; stopped gracefully
 (defn start-processor [input-ch terminate-ch process-input]
   (thread
     (loop []
@@ -47,10 +30,6 @@
             (do (process-input v)
                 (recur)))
           (prn "channel terminated"))))))
-
-(defn fft-handler [windowed-data]
-  (let [a (get-fft windowed-data)]
-    (ws-send {:fft [(map float a)]})))
 
 (defn process-wrapper! [in-channel handler]
   (let [terminator (chan)]
